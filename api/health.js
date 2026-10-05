@@ -4,10 +4,15 @@ export default function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   return res.status(200).json({
     application: "LabelProof",
-    version: "2.1.0",
+    version: "3.0.0",
     status: "ok",
     storage: "browser-indexeddb",
     ocr: "browser-tesseract",
+    cloudConfigured: !!(
+      process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY
+    ),
+    processing: "resumable-browser-jobs",
+    automaticExternalAlerts: false,
     legalRulePack: "not-published",
     registryVerification: "not-connected",
   });

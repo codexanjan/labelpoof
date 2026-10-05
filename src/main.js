@@ -32,6 +32,10 @@ import {
 } from "./views/workspace.js";
 import { captureView } from "./views/capture.js";
 import { reportView } from "./views/report.js";
+import { operationsView } from "./views/operations.js";
+import { initCloud, cloudStatus, cloudClient, authAction } from "./cloud.js";
+import { qualityHints } from "./quality.js";
+import { validateDeclarations } from "./validation.js";
 
 const $ = (selector) => document.querySelector(selector);
 let data;
@@ -59,6 +63,12 @@ const nav = [
   ["rules", "Rule library", "book-open", "/rules"],
   ["activity", "Activity log", "history", "/activity"],
   ["settings", "Settings", "settings", "/settings"],
+  ["account", "Account & privacy", "lock", "/account"],
+  ["team", "Team & cloud", "users", "/team"],
+  ["processing", "Processing & batches", "list-checks", "/processing"],
+  ["approvals", "Review workflow", "check", "/approvals"],
+  ["compare", "Compare reports", "files", "/compare"],
+  ["operations", "Release readiness", "activity", "/operations"],
 ];
 const id = () => crypto.randomUUID();
 const imageUrl = (image) => {
@@ -152,6 +162,17 @@ function render() {
   bindForms();
 }
 function content(r) {
+  if (
+    [
+      "account",
+      "team",
+      "processing",
+      "approvals",
+      "compare",
+      "operations",
+    ].includes(r.view)
+  )
+    return operationsView(r.view, data);
   if (r.view === "overview") return dashboard(data);
   if (r.view === "scans") return scansView(data, state);
   if (r.view === "review") return reviewView(data, state);
@@ -194,6 +215,7 @@ function draftMetadata() {
     origin: $("#origin").value,
   };
   state.captureSurface = $("#surface").value;
+  persistCapture();
 }
 async function refresh() {
   data = await storage.loadWorkspace();
@@ -260,6 +282,7 @@ async function upload(files) {
         quality:
           bitmap.width < 400 || bitmap.height < 300 ? "Unreadable" : "Unknown",
         sha256,
+        qualityHints: await qualityHints(file),
         createdAt: new Date().toISOString(),
         demo: false,
       });
@@ -270,6 +293,7 @@ async function upload(files) {
     }
   }
   state.uploading = false;
+  await persistCapture();
   render();
   if (errors.length) toast([...new Set(errors)].join(" "));
 }
@@ -287,7 +311,24 @@ async function rescan(scanId, fieldKey = state.field) {
     fields.find((f) => f.key === fieldKey)?.surface || "Front";
   go("/dashboard/new");
 }
-async function commitAssessment(
+async function commitAssessment(...args) {
+  const work = async () => {
+    const scan = args[0];
+    if (scan.id) {
+      const persisted = await storage.get("scans", scan.id);
+      if (persisted && persisted.latestAssessmentId !== scan.latestAssessmentId)
+        throw new Error(
+          "A newer assessment exists. Reload the latest report before saving.",
+        );
+    }
+    await refresh();
+    return commitAssessmentInner(...args);
+  };
+  return navigator.locks
+    ? navigator.locks.request("labelproof-assessment-write", work)
+    : work();
+}
+async function commitAssessmentInner(
   scan,
   images,
   findings,
@@ -329,6 +370,7 @@ async function commitAssessment(
       demo: !!scan.demo,
     },
     findings: structuredClone(findings),
+    declarationChecks: validateDeclarations(findings),
     reviewer: data.settings.reviewerName,
     demo: !!scan.demo,
   };
@@ -401,6 +443,9 @@ async function analyze() {
       state.draft.scan.id ? "Photos reassessed" : "Label assessed",
     );
     state.draft = null;
+    await storage.transact(["captureDrafts"], "readwrite", (stores) =>
+      stores.captureDrafts.clear(),
+    );
     closeModal();
     go(`/dashboard/scans/${result.product.id}`);
     toast("Assessment saved with image evidence. Review uncertain findings.");
@@ -537,7 +582,7 @@ async function exportBundle(scanId = null) {
     format: "labelproof-workspace",
     schemaVersion: 2,
     exportedAt: new Date().toISOString(),
-    applicationVersion: "2.0.0",
+    applicationVersion: "3.0.0",
     limitations:
       "Preliminary observations. Legal clauses, applicability and licences are not automatically verified. Local audit history is not tamper-proof.",
     scans: selectedScans,
@@ -546,6 +591,9 @@ async function exportBundle(scanId = null) {
     events: data.events.filter((e) => !scanId || e.scanId === scanId),
     settings: scanId ? undefined : data.settings,
     drafts: scanId ? undefined : data.drafts,
+    operations: scanId
+      ? undefined
+      : data.operations.map(({ image, ...record }) => record),
   };
   download(
     JSON.stringify(payload, null, 2),
@@ -754,6 +802,31 @@ async function importBackup(file) {
         : new Date().toISOString(),
       status: "draft",
     }));
+  const importedOperations = (
+    Array.isArray(input.operations) ? input.operations : []
+  )
+    .slice(0, 2000)
+    .filter(
+      (r) =>
+        r.type === "workflow" &&
+        scanIds.has(r.scanId) &&
+        assessmentIds.has(r.assessmentId) &&
+        ["assign", "comment", "rescan-request", "approve", "reject"].includes(
+          r.action,
+        ),
+    )
+    .map((r) => ({
+      id: id(),
+      type: "workflow",
+      action: r.action,
+      scanId: scanIds.get(r.scanId),
+      assessmentId: assessmentIds.get(r.assessmentId),
+      note: String(r.note || "").slice(0, 5000),
+      assigned: String(r.assigned || "").slice(0, 120),
+      actor: "Imported: " + String(r.actor || "").slice(0, 120),
+      at: Number.isFinite(Date.parse(r.at)) ? r.at : new Date().toISOString(),
+      trust: "imported-preliminary",
+    }));
   const preferences =
     input.settings && typeof input.settings === "object"
       ? {
@@ -775,7 +848,15 @@ async function importBackup(file) {
         }
       : data.settings;
   await storage.transact(
-    ["scans", "images", "assessments", "events", "drafts", "settings"],
+    [
+      "scans",
+      "images",
+      "assessments",
+      "events",
+      "drafts",
+      "settings",
+      "operations",
+    ],
     "readwrite",
     (stores) => {
       scans.forEach((s) => stores.scans.add(s));
@@ -1029,6 +1110,9 @@ document.addEventListener("click", async (e) => {
     }
     const action = element.dataset.action;
     if (action === "cancel-capture") {
+      await storage.transact(["captureDrafts"], "readwrite", (stores) =>
+        stores.captureDrafts.clear(),
+      );
       state.draft = null;
       go("/dashboard");
     }
@@ -1236,6 +1320,18 @@ async function boot() {
       await storage.put("settings", { ...settings, initialized: true });
     }
     await refresh();
+    await initCloud();
+    const capture = await storage.get("captureDrafts", "active");
+    if (capture?.draft) state.draft = capture.draft;
+    const heldLocks = navigator.locks
+      ? (await navigator.locks.query()).held
+      : [];
+    for (const job of data.operations.filter(
+      (r) => r.type === "job" && r.status === "running",
+    ))
+      if (!heldLocks.some((lock) => lock.name === "labelproof-job:" + job.id))
+        await storage.put("operations", { ...job, status: "interrupted" });
+    await refresh();
     await migrateOldSummaries();
     render();
   } catch (error) {
@@ -1244,3 +1340,490 @@ async function boot() {
   }
 }
 boot();
+
+let captureTimer;
+function persistCapture() {
+  if (!state.draft) return Promise.resolve();
+  return storage
+    .put("captureDrafts", {
+      id: "active",
+      draft: structuredClone(state.draft),
+      at: new Date().toISOString(),
+    })
+    .catch(() => {});
+}
+window.addEventListener("error", (e) =>
+  storage
+    .put("operations", {
+      id: id(),
+      type: "error",
+      message: String(e.message).slice(0, 1000),
+      at: new Date().toISOString(),
+    })
+    .catch(() => {}),
+);
+window.addEventListener("labelproof-auth", () => {
+  if (route().view === "account") render();
+});
+let batchStop = false,
+  batchRunning = false;
+async function processJob(job) {
+  if (!job) throw new Error("Job no longer exists.");
+  const work = async () => {
+    const stored = await storage.get("operations", job.id);
+    if (!stored || stored.status === "completed") return;
+    return processJobInner(stored);
+  };
+  return navigator.locks
+    ? navigator.locks.request(
+        "labelproof-job:" + job.id,
+        { ifAvailable: true },
+        (lock) => {
+          if (!lock) throw new Error("This job is running in another tab.");
+          return work();
+        },
+      )
+    : work();
+}
+async function processJobInner(job) {
+  const next = { ...job, status: "running", at: new Date().toISOString() };
+  await storage.put("operations", next);
+  await refresh();
+  render();
+  try {
+    const images = [job.image];
+    await readImages(images, data.settings, (progress) => {
+      const el = $("#job-progress");
+      if (el) el.textContent = progress.stage;
+    });
+    const result = await commitAssessment(
+      {
+        name: job.name,
+        brand: "",
+        category: "Other packaged food",
+        origin: "Unknown",
+        demo: false,
+      },
+      images,
+      assess(images),
+      "Batch image reviewed",
+    );
+    await storage.put("operations", {
+      ...next,
+      status: "completed",
+      scanId: result.product.id,
+      image: null,
+    });
+  } catch (error) {
+    await storage.put("operations", {
+      ...next,
+      status: "failed",
+      error: String(error.message || error),
+    });
+  }
+  await refresh();
+  render();
+}
+async function cloudRPC(name, args) {
+  const { data, error } = await cloudClient().rpc(name, args);
+  if (error) throw error;
+  return data;
+}
+let cloudVersion = 0;
+let cloudOrganization = null;
+async function cloudUpload(orgId) {
+  const c = cloudClient();
+  const { data: remote, error } = await c
+    .from("lp_snapshots")
+    .select("version")
+    .eq("org_id", orgId)
+    .maybeSingle();
+  if (error) throw error;
+  if (
+    (remote?.version || 0) > 0 &&
+    (cloudOrganization !== orgId || remote.version !== cloudVersion)
+  )
+    throw new Error("Cloud changed. Download latest before publishing.");
+  cloudVersion = remote?.version || 0;
+  cloudOrganization = orgId;
+  const images = [];
+  for (const image of data.images) {
+    const clean = cleanImage(image);
+    delete clean.blob;
+    if (image.blob) {
+      const path = orgId + "/" + image.id;
+      const { error } = await c.storage
+        .from("labelproof-evidence")
+        .upload(path, image.blob, {
+          contentType: image.blob.type,
+          upsert: false,
+        });
+      if (error && !/already exists|Duplicate/.test(error.message)) throw error;
+      clean.storagePath = path;
+    }
+    images.push(clean);
+  }
+  const payload = {
+    format: "labelproof-workspace",
+    schemaVersion: 2,
+    scans: data.scans,
+    images,
+    assessments: data.assessments,
+    events: data.events,
+    settings: data.settings,
+    drafts: data.drafts,
+    operations: data.operations.filter((r) => r.type === "workflow"),
+  };
+  cloudVersion = await cloudRPC("lp_save_snapshot", {
+    organization: orgId,
+    expected_version: cloudVersion,
+    payload,
+  });
+  toast("Private cloud snapshot saved. Version " + cloudVersion);
+}
+async function cloudPull(orgId) {
+  const c = cloudClient();
+  const { data: row, error } = await c
+    .from("lp_snapshots")
+    .select("payload,version")
+    .eq("org_id", orgId)
+    .single();
+  if (error) throw error;
+  const payload = row.payload;
+  for (const image of payload.images) {
+    if (image.storagePath) {
+      const { data: blob, error } = await c.storage
+        .from("labelproof-evidence")
+        .download(image.storagePath);
+      if (error) throw error;
+      image.data = await new Promise((resolve) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(blob);
+      });
+      delete image.storagePath;
+    }
+  }
+  await importBackup(
+    new File([JSON.stringify(payload)], "cloud.json", {
+      type: "application/json",
+    }),
+  );
+  cloudVersion = row.version;
+  cloudOrganization = orgId;
+  toast("Cloud records restored as new local products.");
+}
+document.addEventListener("click", async (e) => {
+  const el = e.target.closest("[data-extra]");
+  if (!el || el.disabled) return;
+  el.disabled = true;
+  try {
+    const action = el.dataset.extra;
+    if (action === "reload") location.reload();
+    if (
+      ["login", "signup", "recovery", "password", "logout"].includes(action)
+    ) {
+      const email = $("#account-email").value.trim(),
+        password = $("#account-password").value;
+      if (["signup", "password"].includes(action) && password.length < 12)
+        throw new Error("Use a password of at least 12 characters.");
+      await authAction(action, email, password);
+      toast(
+        action === "signup"
+          ? "Check your email to confirm your account."
+          : action === "recovery"
+            ? "If an account exists, recovery instructions will be sent."
+            : "Account updated.",
+      );
+      render();
+    }
+    if (action === "save-rule-version") {
+      const version = $("#rule-version").value.trim(),
+        url = $("#rule-url").value.trim(),
+        clause = $("#rule-clause").value.trim(),
+        effective = $("#rule-effective").value,
+        notes = $("#rule-notes").value.trim();
+      let source;
+      try {
+        source = new URL(url);
+      } catch {
+        throw new Error("Use an official source URL.");
+      }
+      if (
+        source.protocol !== "https:" ||
+        ![
+          "fssai.gov.in",
+          "www.fssai.gov.in",
+          "consumeraffairs.gov.in",
+          "www.consumeraffairs.gov.in",
+          "consumeraffairs.nic.in",
+          "www.bis.gov.in",
+        ].includes(source.hostname)
+      )
+        throw new Error("Use a supported official authority website.");
+      if (!version || !clause || !effective || !notes)
+        throw new Error(
+          "Add version, clause, effective date and review notes.",
+        );
+      await storage.put("operations", {
+        id: id(),
+        type: "ruleRevision",
+        version,
+        url,
+        clause,
+        effective,
+        notes,
+        status: "draft",
+        at: new Date().toISOString(),
+      });
+      await refresh();
+      render();
+      toast(
+        "Rule draft saved for expert review. Reports retain their existing rule references.",
+      );
+    }
+    if (action === "retention") {
+      const days = Number($("#retention-days").value);
+      if (!Number.isInteger(days) || days < 1 || days > 3650)
+        throw new Error("Choose 1–3650 days.");
+      await storage.put("settings", { ...data.settings, retentionDays: days });
+      await refresh();
+      toast("Retention reminder saved.");
+    }
+    if (action === "create-org") {
+      const name = $("#org-name").value.trim();
+      if (!name) throw new Error("Add an organization name.");
+      const org = await cloudRPC("lp_create_org", { org_name: name });
+      $("#org-id").value = org;
+      toast("Organization created.");
+    }
+    if (action === "list-orgs") {
+      const { data: orgs, error } = await cloudClient()
+        .from("lp_orgs")
+        .select("id,name");
+      if (error) throw error;
+      $("#org-list").innerHTML =
+        orgs
+          .map((o) => `<p><b>${esc(o.name)}</b> <code>${esc(o.id)}</code></p>`)
+          .join("") || "No organizations yet.";
+    }
+    if (action === "add-member") {
+      await cloudRPC("lp_set_member", {
+        organization: $("#org-id").value.trim(),
+        member: $("#member-id").value.trim(),
+        member_role: $("#member-role").value,
+      });
+      toast("Team role saved.");
+    }
+    if (action === "list-members") {
+      const { data: members, error } = await cloudClient()
+        .from("lp_members")
+        .select("user_id,role")
+        .eq("org_id", $("#org-id").value.trim());
+      if (error) throw error;
+      $("#team-result").textContent = JSON.stringify(members, null, 2);
+    }
+    if (action === "sync-cloud") await cloudUpload($("#org-id").value.trim());
+    if (action === "pull-cloud") await cloudPull($("#org-id").value.trim());
+    if (
+      ["assign", "comment", "rescan-request", "approve", "reject"].includes(
+        action,
+      )
+    ) {
+      const scan = data.scans.find((s) => s.id === $("#workflow-scan").value);
+      if (!scan) throw new Error("Choose a product first.");
+      const note = $("#workflow-note").value.trim();
+      if (!note) throw new Error("Record a comment or review rationale.");
+      const assessment = latest(data, scan);
+      const organization = $("#workflow-org").value.trim();
+      if (organization) {
+        const reviewAction = {
+          comment: "comment",
+          assign: "assign",
+          "rescan-request": "request_rescan",
+          approve: "approve",
+          reject: "reject",
+        }[action];
+        await cloudRPC("lp_review", {
+          organization,
+          assessment: assessment.id,
+          review_action: reviewAction,
+          review_note: note,
+        });
+      }
+      await storage.put("operations", {
+        id: id(),
+        type: "workflow",
+        action,
+        scanId: scan.id,
+        assessmentId: assessment.id,
+        note,
+        assigned: $("#assigned-reviewer").value.trim(),
+        actor: data.settings.reviewerName,
+        at: new Date().toISOString(),
+        trust: organization
+          ? "cloud-role-checked-preliminary"
+          : "local-preliminary",
+      });
+      await event("workflow", action + ": " + note, scan.id);
+      await refresh();
+      render();
+      toast("Review event recorded for this assessment version.");
+    }
+    if (action === "compare") {
+      const a = data.assessments.find((a) => a.id === $("#compare-a").value),
+        b = data.assessments.find((a) => a.id === $("#compare-b").value);
+      if (!a || !b) throw new Error("Choose two assessments.");
+      $("#comparison-result").innerHTML =
+        `<div class="table-wrap"><table><thead><tr><th>Declaration</th><th>First</th><th>Second</th><th>Change</th></tr></thead><tbody>${a.findings
+          .map((f) => {
+            const g = b.findings.find((g) => g.key === f.key);
+            return `<tr><td>${esc(f.name)}</td><td>${esc(f.value || statusLabels[f.status])}</td><td>${esc(g?.value || statusLabels[g?.status])}</td><td>${f.value === g?.value && f.status === g?.status ? "Unchanged" : "Changed"}</td></tr>`;
+          })
+          .join("")}</tbody></table></div>`;
+    }
+    if (action === "check-health") {
+      const r = await fetch("/api/health");
+      if (!r.ok) throw new Error("Health service unavailable.");
+      $("#health-result").textContent = JSON.stringify(await r.json(), null, 2);
+    }
+    if (action === "export-operations")
+      download(
+        JSON.stringify(
+          data.operations.map(({ image, ...record }) => record),
+          null,
+          2,
+        ),
+        "labelproof-review-processing-history.json",
+      );
+    if (action === "export-evaluation")
+      download(
+        "image_id,language,category,lighting,field,expected_value,extracted_value,expected_status,reported_status,reviewer,notes\n",
+        "labelproof-evaluation-template.csv",
+        "text/csv",
+      );
+    if (action === "remove-job") {
+      await storage.transact(["operations"], "readwrite", (stores) =>
+        stores.operations.delete(el.dataset.record),
+      );
+      await refresh();
+      render();
+    }
+    if (action === "retry-job") {
+      if (batchRunning) throw new Error("Another job is running.");
+      batchRunning = true;
+      try {
+        await processJob(
+          data.operations.find((r) => r.id === el.dataset.record),
+        );
+      } finally {
+        batchRunning = false;
+      }
+    }
+    if (action === "stop-batch") {
+      batchStop = true;
+      toast("Batch stops after the current product.");
+    }
+    if (action === "run-batch") {
+      if (batchRunning) throw new Error("A batch is already running.");
+      batchRunning = true;
+      batchStop = false;
+      try {
+        for (const job of data.operations.filter(
+          (r) => r.type === "job" && r.status === "queued",
+        )) {
+          if (batchStop) break;
+          await processJob(job);
+        }
+      } finally {
+        batchRunning = false;
+      }
+    }
+    if (action === "barcode") {
+      if (!state.draft?.images.length)
+        throw new Error("Upload a clear barcode photo first.");
+      const { BrowserMultiFormatReader } = await import("@zxing/browser");
+      const reader = new BrowserMultiFormatReader();
+      try {
+        const result = await reader.decodeFromImageUrl(
+          imageUrl(state.draft.images.at(-1)),
+        );
+        state.draft.scan.barcode = result.getText();
+        $("#barcode-value").value = result.getText();
+        await persistCapture();
+        toast("Barcode read. Confirm it matches the product.");
+      } catch {
+        throw new Error(
+          "No readable barcode found. Upload a closer barcode photo or enter it manually.",
+        );
+      }
+    }
+  } catch (error) {
+    toast(error.message || "Action failed.");
+  } finally {
+    el.disabled = false;
+  }
+});
+document.addEventListener("change", async (e) => {
+  if (e.target.id === "barcode-value" && state.draft) {
+    state.draft.scan.barcode = e.target.value;
+    persistCapture();
+  }
+  if (e.target.id !== "batch-files") return;
+  const files = [...e.target.files];
+  if (files.length > 30) {
+    toast("Maximum 30 products per batch.");
+    return;
+  }
+  for (const file of files) {
+    try {
+      if (
+        !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+        file.size > 12 * 1024 * 1024
+      )
+        throw new Error("Use JPG/PNG/WebP under 12 MB.");
+      const bitmap = await createImageBitmap(file);
+      if (bitmap.width * bitmap.height > 40000000) {
+        bitmap.close();
+        throw new Error("Photo exceeds 40 megapixels.");
+      }
+      const job = {
+        id: id(),
+        type: "job",
+        name: file.name.replace(/\.[^.]+$/, ""),
+        status: "queued",
+        at: new Date().toISOString(),
+        image: {
+          id: id(),
+          blob: file,
+          width: bitmap.width,
+          height: bitmap.height,
+          surface: "Back",
+          quality: "Unknown",
+          demo: false,
+          createdAt: new Date().toISOString(),
+        },
+      };
+      bitmap.close();
+      await storage.put("operations", job);
+    } catch (error) {
+      toast(file.name + ": " + error.message);
+    }
+  }
+  await refresh();
+  render();
+  toast("Batch saved. Start processing when ready.");
+});
+
+window.addEventListener("error", () => {
+  if (location.hostname !== "localhost")
+    fetch("/api/telemetry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: "LP_BROWSER_ERROR" }),
+      keepalive: true,
+    }).catch(() => {});
+});
+
+if ("serviceWorker" in navigator && location.hostname !== "localhost")
+  navigator.serviceWorker.register("/sw.js").catch(() => {});

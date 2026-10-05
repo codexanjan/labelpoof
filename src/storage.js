@@ -6,15 +6,18 @@ const STORE_NAMES = [
   "events",
   "settings",
   "drafts",
+  "operations",
+  "captureDrafts",
 ];
 let database;
 export function openDatabase() {
   if (database) return Promise.resolve(database);
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(DB_NAME, 2);
     request.onupgradeneeded = () => {
       for (const name of STORE_NAMES)
-        request.result.createObjectStore(name, { keyPath: "id" });
+        if (!request.result.objectStoreNames.contains(name))
+          request.result.createObjectStore(name, { keyPath: "id" });
     };
     request.onsuccess = () => {
       database = request.result;
@@ -111,7 +114,7 @@ export async function clearWorkspace() {
   );
 }
 export async function loadWorkspace() {
-  const [scans, images, assessments, events, settings, drafts] =
+  const [scans, images, assessments, events, settings, drafts, operations] =
     await Promise.all([
       list("scans"),
       list("images"),
@@ -119,6 +122,7 @@ export async function loadWorkspace() {
       list("events"),
       getSettings(),
       list("drafts"),
+      list("operations"),
     ]);
   return {
     scans: scans.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
@@ -127,5 +131,6 @@ export async function loadWorkspace() {
     events: events.sort((a, b) => b.at.localeCompare(a.at)),
     settings,
     drafts,
+    operations,
   };
 }

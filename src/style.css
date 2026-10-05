@@ -3941,3 +3941,31 @@ td {
     z-index: 40;
   }
 }
+
+.workspace-sidebar {
+  overflow-y: auto;
+}
+.workspace-sidebar nav a {
+  min-height: 36px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.workspace-sidebar .side-bottom {
+  position: static;
+  margin-top: 20px;
+}
+#comparison-result {
+  margin-top: 20px;
+}
+.panel > h2 {
+  margin-bottom: 18px;
+}
+.panel > label {
+  margin-top: 18px;
+}
+#health-result,
+#team-result {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-top: 20px;
+}

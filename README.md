@@ -1,12 +1,18 @@
 # LabelProof — Evidence, not assumptions
 
-**SIH26034 concept · Packaged-food label review workspace · Version 2.1**
+**SIH26034 concept · Packaged-food label review workspace · Version 3.0**
 
 Scan a packaged product, follow its image evidence, and understand what was observed, what is unreadable, and what still needs a photograph. LabelProof turns label review into a transparent, traceable workflow.
 
 **[Open dashboard](https://labelproof-prototype.vercel.app/dashboard)** · **[Public landing page](https://labelproof-prototype.vercel.app/)** · **[Sample report](https://labelproof-prototype.vercel.app/dashboard/scans/demo-oats)** · **[Implementation report](docs/IMPLEMENTATION_REPORT.md)**
 
 ![LabelProof dashboard with product images, observation counts, review queue and activity](docs/images/dashboard.png)
+
+## v3 additions
+
+[Complete release and readiness report](docs/V3_RELEASE.md).
+
+Added persistent capture drafts, resumable browser batches, barcode reading, quality hints, reviewer assignments/comments/preliminary approvals, comparisons, rule-review drafts, an English searchable PDF layer, retention reminders, offline app shell and six new workspace pages. Account/team/private-storage integration and server-enforced organization schema are included; cloud provisioning awaits the required cost confirmation. Legal validation, registry integration and a remote OCR worker remain unimplemented. This release is not certified production-ready.
 
 ## Interaction fixes in v2.1
 

@@ -20,6 +20,12 @@ try {
     "/dashboard/rules",
     "/dashboard/activity",
     "/dashboard/settings",
+    "/dashboard/account",
+    "/dashboard/team",
+    "/dashboard/processing",
+    "/dashboard/approvals",
+    "/dashboard/compare",
+    "/dashboard/operations",
     "/dashboard/scans/demo-oats",
   ]) {
     const response = await page.goto(origin + path);
@@ -32,7 +38,7 @@ try {
   );
   const health = await page.request.get(origin + "/api/health");
   assert.equal(health.status(), 200);
-  assert.equal((await health.json()).version, "2.1.0");
+  assert.equal((await health.json()).version, "3.0.0");
   const sourceResponse = await page.request.get(origin + "/api/sources");
   assert.equal(sourceResponse.status(), 200);
   const manifest = await sourceResponse.json();

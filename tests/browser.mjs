@@ -25,7 +25,7 @@ await page
 await page
   .getByRole("heading", { name: "Your labels, brought into focus." })
   .waitFor();
-assert.equal(await page.locator(".workspace-sidebar nav a").count(), 9);
+assert.equal(await page.locator(".workspace-sidebar nav a").count(), 15);
 assert.equal(await page.locator(".recent tbody tr").count(), 3);
 await shot("dashboard");
 await page.goto(origin + "/dashboard/scans/demo-oats?field=date");

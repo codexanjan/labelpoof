@@ -9,7 +9,8 @@ export async function saveReportPDF(scan, assessment, images, imageUrl) {
   canvas.width = 1240;
   canvas.height = 1754;
   const ctx = canvas.getContext("2d");
-  let y,
+  let searchable = [],
+    y,
     pages = 0;
   const start = () => {
     ctx.fillStyle = "white";
@@ -22,17 +23,25 @@ export async function saveReportPDF(scan, assessment, images, imageUrl) {
   const flush = () => {
     if (pages++) pdf.addPage();
     pdf.addImage(canvas.toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, 210, 297);
+    pdf.setFontSize(10);
+    for (const row of searchable)
+      if (/^[\x20-\x7E]*$/.test(row.text))
+        pdf.text(row.text, (row.x / 1240) * 210, (row.y / 1754) * 297, {
+          renderingMode: "invisible",
+        });
+    searchable = [];
     start();
   };
   const line = (text, bold = false) => {
     ctx.font = `${bold ? "bold " : ""}24px sans-serif`;
-    const paragraphs = String(text || "�").split("\n");
+    const paragraphs = String(text || "--").split("\n");
     for (const paragraph of paragraphs) {
       let row = "";
       for (const char of paragraph) {
         if (ctx.measureText(row + char).width > 1100) {
           if (y > 1640) flush();
           ctx.fillText(row, 70, y);
+          searchable.push({ text: row, x: 70, y });
           y += 34;
           row = "";
         }
@@ -40,11 +49,18 @@ export async function saveReportPDF(scan, assessment, images, imageUrl) {
       }
       if (y > 1640) flush();
       ctx.fillText(row, 70, y);
+      searchable.push({ text: row, x: 70, y });
       y += 34;
     }
     y += 10;
   };
   start();
+  pdf.setProperties({
+    title: product.name + " LabelProof report",
+    subject: "Preliminary label evidence review",
+    creator: "LabelProof",
+    keywords: assessment.id,
+  });
   line(`${product.name} | Version ${assessment.version}`, true);
   line(
     `Brand: ${product.brand || "Unspecified"} | Category: ${product.category} | Origin: ${product.origin}`,
@@ -71,7 +87,7 @@ export async function saveReportPDF(scan, assessment, images, imageUrl) {
     );
   }
   line(
-    "Evidence appendix follows. Text pages preserve script shaping as images; use JSON or CSV for searchable findings.",
+    "Evidence appendix follows. English text is searchable; other scripts retain their visual shaping. Use JSON/CSV for structured records.",
   );
   flush();
   for (const image of images.filter((i) =>

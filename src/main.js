@@ -864,6 +864,7 @@ async function importBackup(file) {
       assessments.forEach((a) => stores.assessments.add(a));
       importedEvents.forEach((e) => stores.events.add(e));
       importedDrafts.forEach((d) => stores.drafts.add(d));
+      importedOperations.forEach((record) => stores.operations.add(record));
       stores.settings.put(preferences);
       stores.events.add({
         id: id(),
@@ -1386,6 +1387,19 @@ async function processJob(job) {
     : work();
 }
 async function processJobInner(job) {
+  const saved = data.scans.find((scan) => scan.processingJobId === job.id);
+  if (saved) {
+    await storage.put("operations", {
+      ...job,
+      status: "completed",
+      scanId: saved.id,
+      image: null,
+    });
+    await refresh();
+    render();
+    return;
+  }
+
   const next = { ...job, status: "running", at: new Date().toISOString() };
   await storage.put("operations", next);
   await refresh();
@@ -1399,6 +1413,7 @@ async function processJobInner(job) {
     const result = await commitAssessment(
       {
         name: job.name,
+        processingJobId: job.id,
         brand: "",
         category: "Other packaged food",
         origin: "Unknown",

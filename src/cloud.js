@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 let client;
 export let cloudStatus = { configured: false, user: null, error: null };
 export async function initCloud() {
@@ -7,6 +6,7 @@ export async function initCloud() {
     if (!r.ok) return;
     const config = await r.json();
     if (!config.url || !config.publishableKey) return;
+    const { createClient } = await import("@supabase/supabase-js");
     client = createClient(config.url, config.publishableKey);
     cloudStatus.configured = true;
     const { data } = await client.auth.getSession();

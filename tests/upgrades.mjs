@@ -56,9 +56,23 @@ await p.waitForFunction(() =>
 await p.reload();
 await p.locator("main h1").waitFor();
 assert.ok((await p.locator("main").innerText()).includes("queued"));
-await p.locator('[data-extra="remove-job"]').click();
+await p.locator('[data-extra="run-batch"]').click();
+await p.waitForFunction(
+  () => document.querySelector("main").textContent.includes("completed"),
+  {},
+  { timeout: 120000 },
+);
+await p.locator('a[href^="/dashboard/scans/"]').last().click();
+await p.locator(".finding-list").waitFor();
+assert.ok((await p.locator(".finding-icon.observed").count()) >= 9);
+await p.goto(origin + "/dashboard/processing");
+await p.locator("#batch-files").setInputFiles("../../work/ocr-180.png");
 await p.waitForFunction(() =>
-  document.querySelector("main").textContent.includes("No processing jobs"),
+  document.querySelector("main").textContent.includes("queued"),
+);
+await p.locator('[data-extra="remove-job"]').click();
+await p.waitForFunction(
+  () => !document.querySelector("[data-extra=remove-job]"),
 );
 assert.deepEqual(errors, []);
 console.log(

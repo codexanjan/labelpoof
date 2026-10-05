@@ -2,7 +2,10 @@ export async function qualityHints(blob) {
   const bmp = await createImageBitmap(blob);
   const c = document.createElement("canvas");
   c.width = 320;
-  c.height = Math.max(1, Math.round((bmp.height / bmp.width) * 320));
+  c.height = Math.min(
+    320,
+    Math.max(1, Math.round((bmp.height / bmp.width) * 320)),
+  );
   const ctx = c.getContext("2d", { willReadFrequently: true });
   ctx.drawImage(bmp, 0, 0, c.width, c.height);
   bmp.close();

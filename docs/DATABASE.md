@@ -47,3 +47,7 @@ erDiagram
 ```
 
 The SQL is a reviewable design artifact and was not executed against a provisioned database. Authentication, tenant enforcement, authorized rule publication, object-store access, immutable-record guards, migrations and deletion/retention policies must be completed before production use. Do not connect this unreviewed schema directly to public requests.
+
+## v3 local additions
+
+IndexedDB version 2 adds operations (jobs, preliminary workflow events, error records and rule-review drafts) and captureDrafts (saved metadata and original image blobs). The SQL in supabase/schema.sql defines organization roles, private evidence access, version-checked snapshots and role-checked review events. It is not applied to a cloud database until provisioning is confirmed.

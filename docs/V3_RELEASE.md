@@ -33,3 +33,7 @@ The cloud adapter and `supabase/schema.sql` are implemented but have not been ex
 - Install GitHub Actions workflow and repository deployment integration with the required account permissions.
 
 This release adds operational features; it does not claim all production gates are met.
+
+## Verification
+
+22 unit checks passed. Original button and browser suites passed. Upgrade suite verified new routes, comparison, version-specific preliminary decisions, capture reload recovery and real batch OCR. Live Vercel routes and original OCR/backup workflow are checked after deployment. The cloud security/schema integration remains unprovisioned and unverified, as explained above.

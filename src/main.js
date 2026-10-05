@@ -620,7 +620,12 @@ async function importBackup(file) {
   for (const original of input.images) {
     let blob;
     if (original.data) {
-      blob = await (await fetch(original.data)).blob();
+      const [prefix, encoded] = original.data.split(",");
+      const raw = atob(encoded);
+      const bytes = new Uint8Array(raw.length);
+      for (let index = 0; index < raw.length; index++)
+        bytes[index] = raw.charCodeAt(index);
+      blob = new Blob([bytes], { type: prefix.slice(5, prefix.indexOf(";")) });
       const bitmap = await createImageBitmap(blob);
       if (
         bitmap.width !== original.width ||

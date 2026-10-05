@@ -2,7 +2,7 @@
 
 ## Delivered
 
-Separate public landing and nine-page dashboard; guided upload/camera capture; seven packaging surface labels; real browser OCR; 12 declaration detectors; image-linked findings; explicit unresolved states; cross-image conflict retention; reviewer corrections; guarded absence review; optional bounded image highlights; persistent original images; versioned assessments; historical reports; review queue; evidence gallery; analytics; official source library; non-executable drafts; preferences; audit timeline; JSON/CSV/browser-PDF export; image-inclusive backup/import; deletion; serverless metadata APIs; reproducible synthetic images; screenshots and project documentation.
+Separate public landing and nine-page dashboard; guided upload/camera capture; seven packaging surface labels; real browser OCR; 12 declaration detectors; image-linked findings; explicit unresolved states; cross-image conflict retention; reviewer corrections; guarded absence review; optional bounded image highlights; persistent original images; versioned assessments; historical reports; review queue; evidence gallery; analytics; official source library; non-executable drafts; preferences; audit timeline; JSON/CSV/downloadable-PDF export; image-inclusive backup/import; deletion; serverless metadata APIs; reproducible synthetic images; screenshots and project documentation.
 
 ## Improvement over v1
 
@@ -22,7 +22,7 @@ The generated fixture is a functional test, not an accuracy benchmark. Hindi set
 
 ## Known limits
 
-No cloud authentication or shared database; no government registry integration; no validated legal rule publication; no calibrated field-level quality model; no logo/symbol detection; no laboratory/product-content validation. Suggested surface positions and OCR confidence are heuristics. Local audit history is editable by the device owner. Browser print handles PDF export.
+No cloud authentication or shared database; no government registry integration; no validated legal rule publication; no calibrated field-level quality model; no logo/symbol detection; no laboratory/product-content validation. Suggested surface positions and OCR confidence are heuristics. Local audit history is editable by the device owner. Client-side PDF export includes findings and original evidence images; text pages are rasterized for browser script shaping.
 
 ## Repository deliverables
 
@@ -31,3 +31,7 @@ Application source, lockfile, Vercel config, read-only APIs, tests, CI workflow 
 The publishing GitHub login lacks `workflow` permission. GitHub Actions configuration is preserved as `docs/ci-workflow.yml` for installation with an authorized login; no remote Actions run is claimed. Validation was performed locally.
 
 Vercel deployment was performed directly. Automatic GitHub linking was attempted but rejected because the Vercel GitHub integration lacks repository access. The source push itself succeeded. Future pushes require either another direct deployment or configuring repository access in Vercel.
+
+## v2.1 interaction repair
+
+Downloadable PDF, queue-specific rescan guidance, preserved imported comparison evidence, mobile dismissal, OCR cancellation/timeout/error recovery, repeat-save guards, retryable file input and history recovery. See [button audit](BUTTON_AUDIT.md). Unit checks, browser workflow, focused button audit, real OCR and OCR failure checks passed before deployment.

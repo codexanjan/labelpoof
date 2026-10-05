@@ -93,7 +93,13 @@ function route() {
   if (match)
     return {
       view: "report",
-      scanId: decodeURIComponent(match[1]),
+      scanId: (() => {
+        try {
+          return decodeURIComponent(match[1]);
+        } catch {
+          return "";
+        }
+      })(),
       version: Number(query.get("version")) || null,
       field: query.get("field"),
     };
@@ -122,6 +128,7 @@ function newDraft() {
   };
 }
 function render() {
+  document.body.classList.remove("navigation-open");
   const r = route();
   if (r.field) state.field = r.field;
   if (r.view === "capture" && !state.draft) state.draft = newDraft();
@@ -134,7 +141,7 @@ function render() {
           ? "New scan"
           : nav.find((n) => n[0] === r.view)?.[1] || "Page not found";
     $("#app").innerHTML =
-      `<a class="skip-link" href="#content">Skip to content</a><aside class="sidebar workspace-sidebar"><a class="brand" href="/">${icon("scan-line")}<span>Label<span class="brand-light">Proof</span><small>EVIDENCE, NOT ASSUMPTIONS</small></span></a><div class="workspace"><span class="avatar">LP</span><div>${esc(data.settings.workspaceName)}<small>Local browser workspace</small></div></div><div class="nav-label">WORKSPACE</div><nav>${nav.map(([key, title, i, path]) => `<a href="/dashboard${path}" class="${r.view === key || (r.view === "report" && key === "scans") ? "active" : ""}">${icon(i)}<span>${title}</span>${key === "review" ? `<span class="nav-count">${queueItems(data).length}</span>` : ""}</a>`).join("")}</nav><div class="sidebar-storage">${icon("hard-drive")}<div><b>Evidence stays with you.</b><small>Photos and reports saved on this device.</small></div></div><a class="side-bottom" href="/dashboard/settings"><span class="avatar small">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</span><div>${esc(data.settings.reviewerName)}<small>SIH26034 · Prototype</small></div><span class="live-dot"></span></a></aside><div class="main"><header><div class="header-leading"><button class="icon-button menu-toggle" data-action="menu" aria-label="Toggle navigation">${icon("menu")}</button><div class="breadcrumb">Workspace <span>/</span> ${viewName}</div></div><form id="global-search" class="global-search">${icon("search")}<input aria-label="Search products" placeholder="Search products…" value="${esc(state.search)}"><button type="submit" aria-label="Search">${icon("arrow-right")}</button></form><div class="header-right"><span class="prototype">${icon("flask-conical")} Prototype</span><button class="icon-button notification-button" data-action="notifications" aria-label="View recent activity">${icon("bell")}<span></span></button><a class="avatar small" href="/dashboard/settings" aria-label="Workspace settings">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</a></div></header><main id="content" tabindex="-1">${content(r)}</main><footer><span>LabelProof · Evidence, not assumptions.</span><span>${icon("lock-keyhole")} Browser storage · Preliminary label review</span></footer></div>`;
+      `<a class="skip-link" href="#content">Skip to content</a><button class="menu-backdrop" data-action="menu" aria-label="Close navigation"></button><aside class="sidebar workspace-sidebar"><button class="icon-button menu-close" data-action="menu" aria-label="Close navigation">${icon("x")}</button><a class="brand" href="/">${icon("scan-line")}<span>Label<span class="brand-light">Proof</span><small>EVIDENCE, NOT ASSUMPTIONS</small></span></a><div class="workspace"><span class="avatar">LP</span><div>${esc(data.settings.workspaceName)}<small>Local browser workspace</small></div></div><div class="nav-label">WORKSPACE</div><nav>${nav.map(([key, title, i, path]) => `<a href="/dashboard${path}" class="${r.view === key || (r.view === "report" && key === "scans") ? "active" : ""}">${icon(i)}<span>${title}</span>${key === "review" ? `<span class="nav-count">${queueItems(data).length}</span>` : ""}</a>`).join("")}</nav><div class="sidebar-storage">${icon("hard-drive")}<div><b>Evidence stays with you.</b><small>Photos and reports saved on this device.</small></div></div><a class="side-bottom" href="/dashboard/settings"><span class="avatar small">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</span><div>${esc(data.settings.reviewerName)}<small>SIH26034 · Prototype</small></div><span class="live-dot"></span></a></aside><div class="main"><header><div class="header-leading"><button class="icon-button menu-toggle" data-action="menu" aria-label="Toggle navigation">${icon("menu")}</button><div class="breadcrumb">Workspace <span>/</span> ${viewName}</div></div><form id="global-search" class="global-search">${icon("search")}<input aria-label="Search products" placeholder="Search products…" value="${esc(state.search)}"><button type="submit" aria-label="Search">${icon("arrow-right")}</button></form><div class="header-right"><span class="prototype">${icon("flask-conical")} Prototype</span><button class="icon-button notification-button" data-action="notifications" aria-label="View recent activity">${icon("bell")}<span></span></button><a class="avatar small" href="/dashboard/settings" aria-label="Workspace settings">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</a></div></header><main id="content" tabindex="-1">${content(r)}</main><footer><span>LabelProof · Evidence, not assumptions.</span><span>${icon("lock-keyhole")} Browser storage · Preliminary label review</span></footer></div>`;
   }
   if (!$("#dialog-host"))
     document.body.insertAdjacentHTML(
@@ -203,11 +210,14 @@ async function event(type, message, scanId = null) {
 }
 
 async function upload(files) {
-  if (state.busy) return;
+  if (state.busy || state.uploading) return;
   draftMetadata();
+  state.uploading = true;
+  const uploadDraft = state.draft,
+    uploadSurface = state.captureSurface;
   const errors = [];
   for (const file of files) {
-    if (state.draft.images.length >= 12) {
+    if (uploadDraft.images.length >= 12) {
       errors.push("Maximum 12 photos per scan.");
       break;
     }
@@ -241,10 +251,10 @@ async function upload(files) {
         new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)),
         (b) => b.toString(16).padStart(2, "0"),
       ).join("");
-      state.draft.images.push({
+      uploadDraft.images.push({
         id: id(),
         blob: file,
-        surface: state.captureSurface,
+        surface: uploadSurface,
         width: bitmap.width,
         height: bitmap.height,
         quality:
@@ -259,10 +269,11 @@ async function upload(files) {
       bitmap?.close();
     }
   }
+  state.uploading = false;
   render();
   if (errors.length) toast([...new Set(errors)].join(" "));
 }
-async function rescan(scanId) {
+async function rescan(scanId, fieldKey = state.field) {
   const scan = data.scans.find((s) => s.id === scanId);
   if (!scan) return;
   const assessment = latest(data, scan);
@@ -273,7 +284,7 @@ async function rescan(scanId) {
     ),
   };
   state.captureSurface =
-    fields.find((f) => f.key === state.field)?.surface || "Front";
+    fields.find((f) => f.key === fieldKey)?.surface || "Front";
   go("/dashboard/new");
 }
 async function commitAssessment(
@@ -345,6 +356,8 @@ async function commitAssessment(
   return { product, assessment };
 }
 async function analyze() {
+  if (state.uploading)
+    return toast("Please wait for your photos to finish loading.");
   if (state.busy) return;
   draftMetadata();
   if (!state.draft.scan.name) {
@@ -354,19 +367,32 @@ async function analyze() {
   }
   if (!state.draft.images.length) return toast("Add a photo first.");
   state.busy = true;
+  state.ocrController = new AbortController();
   showModal(
     "Following the evidence.",
     `<div class="processing"><div class="spinner"></div><span class="eyebrow">READING YOUR LABEL</span><p id="progress">Preparing image evidence…</p><progress id="ocr-progress" max="1" value="0"></progress><small>The OCR engine downloads on first use. Your photos stay in this browser.</small></div>`,
   );
   $('#dialog [data-action="close"]').hidden = true;
-  $("#dialog").addEventListener("cancel", (e) => e.preventDefault());
+  $("#dialog").insertAdjacentHTML(
+    "beforeend",
+    '<button class="secondary" data-action="cancel-ocr">Cancel processing</button>',
+  );
+  $("#dialog").addEventListener("cancel", (e) => {
+    e.preventDefault();
+    state.ocrController.abort();
+  });
   try {
-    await readImages(state.draft.images, data.settings, (progress) => {
-      if ($("#progress")) {
-        $("#progress").textContent = progress.stage;
-        $("#ocr-progress").value = progress.progress;
-      }
-    });
+    await readImages(
+      state.draft.images,
+      data.settings,
+      (progress) => {
+        if ($("#progress")) {
+          $("#progress").textContent = progress.stage;
+          $("#ocr-progress").value = progress.progress;
+        }
+      },
+      state.ocrController.signal,
+    );
     const findings = assess(state.draft.images);
     const result = await commitAssessment(
       state.draft.scan,
@@ -381,7 +407,10 @@ async function analyze() {
   } catch (error) {
     closeModal();
     toast(
-      "OCR or saving failed. Photos are retained for retry. " + error.message,
+      error.name === "AbortError"
+        ? "Processing cancelled. Photos are retained for retry."
+        : "OCR or saving failed. Photos are retained for retry. " +
+            error.message,
     );
   } finally {
     state.busy = false;
@@ -636,7 +665,12 @@ async function importBackup(file) {
         coverageImageIds: (f.coverageImageIds || [])
           .map((i) => imageIds.get(i))
           .filter(Boolean),
-        observations: [],
+        observations: (f.observations || []).map((o) => ({
+          value: String(o.value || "").slice(0, 3000),
+          imageId: imageIds.get(o.imageId),
+          box: o.box || null,
+          confidence: Number.isFinite(o.confidence) ? o.confidence : 0,
+        })),
         registryVerification:
           field.key === "licence" ? "NOT_ATTEMPTED" : undefined,
       };
@@ -782,6 +816,19 @@ function draftRule() {
   );
 }
 function bindForms() {
+  document
+    .querySelectorAll("#product-name,#product-brand,#category,#origin,#surface")
+    .forEach((input) => input.addEventListener("input", draftMetadata));
+  document.querySelectorAll("label:has(input[type=file])").forEach((label) => {
+    label.tabIndex = 0;
+    label.setAttribute("role", "button");
+    label.addEventListener("keydown", (e) => {
+      if (["Enter", " "].includes(e.key)) {
+        e.preventDefault();
+        label.querySelector("input").click();
+      }
+    });
+  });
   $("#global-search")?.addEventListener("submit", (e) => {
     e.preventDefault();
     state.search = e.target.querySelector("input").value;
@@ -789,6 +836,8 @@ function bindForms() {
   });
   $("#settings-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (state.savingSettings) return;
+    state.savingSettings = true;
     try {
       const form = new FormData(e.target);
       const threshold = Number(form.get("confidenceThreshold"));
@@ -813,6 +862,8 @@ function bindForms() {
       toast("Preferences saved on this device.");
     } catch (error) {
       toast(error.message);
+    } finally {
+      state.savingSettings = false;
     }
   });
   $("#file")?.addEventListener("change", (e) => upload([...e.target.files]));
@@ -820,10 +871,15 @@ function bindForms() {
     upload([...e.target.files]),
   );
   $("#backup-file")?.addEventListener("change", async (e) => {
+    if (state.importing) return;
+    state.importing = true;
     try {
       await importBackup(e.target.files[0]);
     } catch (error) {
       toast("Import rejected: " + error.message);
+    } finally {
+      state.importing = false;
+      e.target.value = "";
     }
   });
   $("#dropzone")?.addEventListener("dragover", (e) => {
@@ -890,6 +946,7 @@ document.addEventListener("click", async (e) => {
     e.button === 0
   ) {
     e.preventDefault();
+    if (state.busy || state.actionBusy) return;
     closeModal();
     go(anchor.pathname + anchor.search);
     return;
@@ -897,9 +954,16 @@ document.addEventListener("click", async (e) => {
   const element = e.target.closest(
     "[data-action],[data-rescan],[data-finding],[data-evidence],[data-review-filter],[data-finding-filter],[data-remove],[data-image],[data-delete-draft]",
   );
-  if (!element || element.disabled || state.busy) return;
+  if (element?.dataset.action === "cancel-ocr") {
+    state.ocrController?.abort();
+    return;
+  }
+  if (!element || element.disabled || state.busy || state.actionBusy) return;
+  state.actionBusy = true;
+  element.setAttribute("aria-busy", "true");
   try {
-    if (element.dataset.rescan) return await rescan(element.dataset.rescan);
+    if (element.dataset.rescan)
+      return await rescan(element.dataset.rescan, element.dataset.rescanField);
     if (element.dataset.finding) {
       state.field = element.dataset.finding;
       const params = new URLSearchParams(location.search);
@@ -923,13 +987,34 @@ document.addEventListener("click", async (e) => {
     }
     if (element.dataset.findingFilter) {
       state.findingFilter = element.dataset.findingFilter;
+      const selected = currentAssessment().findings.find(
+        (f) =>
+          state.findingFilter === "all" ||
+          (state.findingFilter === "observed"
+            ? f.status === "observed"
+            : !["observed", "not_applicable"].includes(f.status)),
+      );
+      if (selected) {
+        state.field = selected.key;
+        const params = new URLSearchParams(location.search);
+        params.set("field", state.field);
+        history.replaceState({}, "", location.pathname + "?" + params);
+        state.evidenceImage = null;
+      }
       render();
       return;
     }
     if (element.dataset.image) return showImage(element.dataset.image);
     if (element.dataset.remove !== undefined) {
       draftMetadata();
-      state.draft.images.splice(Number(element.dataset.remove), 1);
+      const [removed] = state.draft.images.splice(
+        Number(element.dataset.remove),
+        1,
+      );
+      if (removed && urls.has(removed.id)) {
+        URL.revokeObjectURL(urls.get(removed.id));
+        urls.delete(removed.id);
+      }
       render();
       return;
     }
@@ -943,13 +1028,20 @@ document.addEventListener("click", async (e) => {
       return;
     }
     const action = element.dataset.action;
+    if (action === "cancel-capture") {
+      state.draft = null;
+      go("/dashboard");
+    }
     if (action === "new") {
       state.draft = newDraft();
       go("/dashboard/new");
     }
     if (action === "close") closeModal();
-    if (action === "menu")
-      $(".workspace-sidebar").classList.toggle("menu-open");
+    if (action === "menu") {
+      const open = $(".workspace-sidebar").classList.toggle("menu-open");
+      document.body.classList.toggle("navigation-open", open);
+      $(".menu-toggle").setAttribute("aria-expanded", String(open));
+    }
     if (action === "analyze") await analyze();
     if (action === "review") openReview();
     if (action === "save-review") await saveReview();
@@ -957,7 +1049,11 @@ document.addEventListener("click", async (e) => {
     if (action === "export-workspace") await exportBundle();
     if (action === "export-csv") {
       download(
-        findingsCSV(currentScan(), currentAssessment(), sources),
+        findingsCSV(
+          currentAssessment().productSnapshot || currentScan(),
+          currentAssessment(),
+          sources,
+        ),
         "labelproof-findings.csv",
         "text/csv;charset=utf-8",
       );
@@ -968,7 +1064,21 @@ document.addEventListener("click", async (e) => {
       );
       await refresh();
     }
-    if (action === "print") window.print();
+    if (action === "print") {
+      const { saveReportPDF } = await import("./pdf.js");
+      await saveReportPDF(
+        currentScan(),
+        currentAssessment(),
+        data.images,
+        imageUrl,
+      );
+      await event(
+        "export",
+        "Complete report and image evidence downloaded as PDF",
+        currentScan().id,
+      );
+      await refresh();
+    }
     if (action === "zoom-in") {
       state.zoom = Math.min(2, state.zoom + 0.25);
       render();
@@ -992,6 +1102,12 @@ document.addEventListener("click", async (e) => {
       );
     if (action === "confirm-delete-scan") {
       const scan = currentScan();
+      for (const image of data.images.filter((i) => i.scanId === scan.id)) {
+        if (urls.has(image.id)) {
+          URL.revokeObjectURL(urls.get(image.id));
+          urls.delete(image.id);
+        }
+      }
       await storage.deleteScan(scan.id);
       await event("delete", `${scan.name} removed from local workspace`);
       await refresh();
@@ -1021,6 +1137,8 @@ document.addEventListener("click", async (e) => {
     }
     if (action === "load-demos") {
       await seedDemos();
+      state.search = "";
+      state.scanFilter = "all";
       await refresh();
       render();
       toast("Three labelled synthetic samples are ready.");
@@ -1045,9 +1163,19 @@ document.addEventListener("click", async (e) => {
   } catch (error) {
     toast(error.message || "This action could not complete.");
     console.error(error);
+  } finally {
+    state.actionBusy = false;
+    element.removeAttribute("aria-busy");
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    document.body.classList.remove("navigation-open");
+    $(".workspace-sidebar")?.classList.remove("menu-open");
   }
 });
 window.addEventListener("popstate", () => {
+  draftMetadata();
   state.evidenceImage = null;
   render();
 });

@@ -1,6 +1,6 @@
 # LabelProof — Evidence, not assumptions
 
-**SIH26034 concept · Packaged-food label review workspace · Version 2.0**
+**SIH26034 concept · Packaged-food label review workspace · Version 2.1**
 
 Scan a packaged product, follow its image evidence, and understand what was observed, what is unreadable, and what still needs a photograph. LabelProof turns label review into a transparent, traceable workflow.
 
@@ -8,7 +8,18 @@ Scan a packaged product, follow its image evidence, and understand what was obse
 
 ![LabelProof dashboard with product images, observation counts, review queue and activity](docs/images/dashboard.png)
 
-## What changed in this release
+## Interaction fixes in v2.1
+
+See the [button and recovery audit](docs/BUTTON_AUDIT.md) for checks and limits.
+
+- Download complete PDFs with all findings, notes, sources, comparison values, photos and highlights. Text pages preserve browser script shaping as images; CSV/JSON are searchable.
+- Rescan from the selected queue declaration; preserve conflicting evidence and comparison buttons through backup import.
+- Close mobile navigation via its button, backdrop, Escape or a destination link.
+- Cancel OCR and retain photos for retry. Recognition failures are caught; worker operations time out after 90 seconds.
+- Reject invalid backups and reset the chooser. Cancel capture discards its draft; normal in-app navigation retains entered details.
+- Guard repeated saves and provide recovery links for unavailable report versions.
+
+## Dashboard release features
 
 The original single-screen prototype has become a separate dashboard with nine workspace pages, real browser OCR, persistent images, assessment history, import/export and review tools. The public landing page remains separate at `/`; the workspace opens at `/dashboard`.
 
@@ -17,7 +28,7 @@ The original single-screen prototype has become a separate dashboard with nine w
 - Replaced summary-only local storage with an IndexedDB database that retains original image blobs, extraction text, evidence coordinates and reports after reload.
 - Added immutable assessment versions, product snapshots, image snapshots and correction rationale.
 - Added conflicting-value detection across photographs, targeted rescanning and manual applicability review.
-- Added full workspace backups with embedded uploaded images, report JSON, CSV and print-to-PDF.
+- Added full workspace backups with embedded uploaded images, report JSON, CSV and downloadable PDF with a complete evidence appendix.
 - Added backup validation, source-image validation, SHA-256 hashing, CSV formula escaping and individual/local-workspace deletion.
 - Added English and English/Hindi OCR settings, workspace preferences, source-review drafts and an activity timeline.
 - Added two Vercel serverless metadata endpoints, automated checks, a CI workflow template, screenshots and system documentation.
@@ -165,7 +176,7 @@ To inspect Vercel functions locally, use `vercel dev`; ordinary Vite development
 6. Use **Review / correct** to record exact text, applicability and a rationale. Optional image-box coordinates must stay inside the image.
 7. Use **Add a photo & reassess** for uncertain findings. Conflicting readings stay visible.
 8. Reopen earlier versions from the report selector or report archive.
-9. Export report JSON, CSV or choose **Save PDF**, then use the browser's “Save as PDF” destination.
+9. Export report JSON, CSV or choose **Save PDF**, download the complete report with its image appendix.
 10. Export a full workspace backup from Settings before clearing site data or moving devices.
 
 ## System architecture
@@ -181,7 +192,7 @@ flowchart LR
     G --> H[Evidence report and review queue]
     H --> I[Human correction or rescan]
     I --> G
-    G --> J[JSON backup / CSV / browser PDF]
+    G --> J[JSON backup / CSV / downloadable PDF]
     K[Vercel metadata APIs] --> L[Health and official-source manifest]
 ```
 
@@ -193,7 +204,7 @@ flowchart LR
 | Observation engine | Deterministic declaration detectors, uncertainty states and cross-image conflict retention |
 | Database | IndexedDB object stores; original images remain binary blobs |
 | Backend | Vercel serverless health and source-manifest endpoints |
-| Reports | Versioned assessment snapshots, JSON, CSV, print-to-PDF |
+| Reports | Versioned assessment snapshots, JSON, CSV, downloadable PDF |
 | Hosting | Vercel production deployment with dashboard-route rewrites |
 
 ### Current database models
@@ -301,7 +312,7 @@ Browser checks generate documentation screenshots and a synthetic sample PDF. Te
 - OCR confidence is heuristic. Whole-image confidence is not a validated field-level readability classifier.
 - Suggested surface locations are capture guidance, not assertions that a declaration must legally appear on that surface.
 - A photographed FSSAI or BIS declaration is not an official licence-verification result.
-- PDF export uses browser printing, not a server PDF service.
+- PDF export generates a client-side download. Text pages are rasterized to preserve script shaping; use CSV/JSON for searchable records.
 - Local notes and audit history are not authenticated or tamper-resistant.
 
 ## Production roadmap

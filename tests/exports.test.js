@@ -79,3 +79,11 @@ test("CSV escapes formulas and commas", () => {
   assert.ok(csv.includes("'=HYPERLINK"));
   assert.ok(csv.includes('"400 g, packed"'));
 });
+
+test("comparison evidence must reference an image in the assessment", () => {
+  const f = fixture();
+  f.assessments[0].findings[0].observations = [
+    { imageId: "missing", value: "400 g" },
+  ];
+  assert.throws(() => validateBackup(f), /comparison/);
+});

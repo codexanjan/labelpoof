@@ -101,6 +101,23 @@ export function validateBackup(input) {
       )
         throw new Error("Invalid finding.");
       keys.add(finding.key);
+      if (
+        finding.observations !== undefined &&
+        (!Array.isArray(finding.observations) ||
+          finding.observations.length > 100 ||
+          finding.observations.some(
+            (o) =>
+              !assessment.imageIds.includes(o.imageId) ||
+              !string(o.value || "", 3000) ||
+              (o.box &&
+                !validateBox(
+                  o.box,
+                  images.get(o.imageId).width,
+                  images.get(o.imageId).height,
+                )),
+          ))
+      )
+        throw new Error("Invalid comparison evidence.");
       if (finding.imageId && !assessment.imageIds.includes(finding.imageId))
         throw new Error("Finding references unavailable evidence.");
       if (

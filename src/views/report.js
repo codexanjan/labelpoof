@@ -13,6 +13,7 @@ export function reportView(scan, assessment, data, state, imageUrl) {
       "ASSESSMENT",
       "Report not found.",
       "Return to the product library and select an available assessment.",
+      `<a class="secondary" href="/dashboard/scans">Open product library</a><a class="primary" href="/dashboard/scans/${scan.id}">Latest report</a>`,
     );
   const count = summary(assessment.findings);
   const finding =

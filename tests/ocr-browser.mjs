@@ -73,7 +73,7 @@ await page
 await page.getByRole("heading", { name: "Every scan has a story." }).waitFor();
 await page.locator("#scan-search").fill("Real OCR workflow test");
 assert.equal(await page.locator(".scan-results tbody tr").count(), 2);
-await page.locator(".product-link").first().click();
+await page.locator(".product-link").last().click();
 await page
   .getByRole("heading", { name: "Real OCR workflow test", exact: true })
   .waitFor();
@@ -82,6 +82,9 @@ assert.ok(
     .locator("#evidence-img")
     .evaluate((img) => img.complete && img.naturalWidth > 0),
 );
+await page.locator('[data-finding="price"]').click();
+assert.equal(await page.locator(".conflict-list button").count(), 2);
+await page.locator(".conflict-list button").last().click();
 await page.getByRole("button", { name: "Delete this local product" }).click();
 await page.getByRole("button", { name: "Delete product", exact: true }).click();
 await page.getByRole("heading", { name: "Every scan has a story." }).waitFor();

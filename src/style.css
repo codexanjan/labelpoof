@@ -3917,3 +3917,27 @@ td {
     break-inside: avoid;
   }
 }
+
+.menu-close,
+.menu-backdrop {
+  display: none;
+}
+@media (max-width: 900px) {
+  .menu-close {
+    display: flex;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+  }
+  .navigation-open .menu-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+    background: #13241a88;
+    border: 0;
+  }
+  .workspace-sidebar.menu-open {
+    z-index: 40;
+  }
+}

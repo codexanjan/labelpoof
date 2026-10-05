@@ -264,8 +264,7 @@ Validation performed for the v2 implementation:
 
 | Check | Result |
 | --- | --- |
-| Observation and export unit checks | Passed |
-| Vercel metadata handler checks | Passed |
+| Observation/export and metadata handler unit checks | Passed: 19 tests total |
 | Production build | Passed |
 | Dedicated dashboard browser flow | Passed: navigation, evidence, review guard, version history and reload persistence |
 | Exports/import | Passed: JSON, CSV, generated PDF and full workspace import |
@@ -274,12 +273,14 @@ Validation performed for the v2 implementation:
 | Rescan conflict | Passed: different price values retained as conflicting observations |
 | Image persistence | Passed: original uploaded image restored after reload and backup/import |
 | Deletion | Passed: individual scan and related evidence removed through the application |
+| Published deployment | Passed: direct dashboard links, images and metadata endpoints |
 
 The clean fixture result is **a functional smoke test, not a dataset-wide accuracy benchmark**. No model accuracy claim is made for reflective, curved, multilingual, damaged or low-resolution real packaging. English/Hindi is selectable; the real OCR smoke test uses English.
 
 ```bash
 # Requires Chrome on your machine and the app running at localhost:5173
 npm run test:browser
+node tests/deployment.mjs
 node tests/ocr-browser.mjs
 
 # Test the deployed dashboard instead
@@ -321,7 +322,7 @@ See [PRD](docs/PRD.md), [PSD](docs/PSD.md), [TRD](docs/TRD.md) and [demo script]
 
 ## Deployment
 
-The existing Vercel project is `labelproof-prototype`. The repository name intentionally remains the user-provided `labelpoof`.
+The existing Vercel project is `labelproof-prototype`. The repository name intentionally remains the user-provided `labelpoof`. Source is pushed to `main`, and the live site is deployed directly through the Vercel CLI. Automatic GitHub deployment is not connected: Vercel's GitHub integration currently lacks access to this repository. Enable that integration in Vercel with repository access if automatic deployments are desired.
 
 ```bash
 npm run build

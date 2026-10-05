@@ -16,6 +16,7 @@ The original application stored only report summaries. v2 retains image blobs an
 - Real OCR workflow: 12/12 declarations on one clean English generated fixture, image/hash persistence, second-image price conflict, historical assessment preservation, image backup/import and deletion.
 - Mobile overflow regression checked at 390 × 844.
 - Production bundle built successfully.
+- Published routes, synthetic image assets and `/api/health` / `/api/sources` verified on the production Vercel domain.
 
 The generated fixture is a functional test, not an accuracy benchmark. Hindi settings are implemented but the real OCR smoke test is English. Broader legal, security and accessibility certification has not been performed.
 
@@ -28,3 +29,5 @@ No cloud authentication or shared database; no government registry integration; 
 Application source, lockfile, Vercel config, read-only APIs, tests, CI workflow template, asset generator, product/label assets, screenshots, sample PDF, PRD/PSD/TRD, current database models, proposed PostgreSQL schema, API roadmap, regulatory source policy, dataset card and demonstration script.
 
 The publishing GitHub login lacks `workflow` permission. GitHub Actions configuration is preserved as `docs/ci-workflow.yml` for installation with an authorized login; no remote Actions run is claimed. Validation was performed locally.
+
+Vercel deployment was performed directly. Automatic GitHub linking was attempted but rejected because the Vercel GitHub integration lacks repository access. The source push itself succeeded. Future pushes require either another direct deployment or configuring repository access in Vercel.

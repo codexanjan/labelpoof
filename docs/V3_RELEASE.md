@@ -19,13 +19,13 @@
 
 ## Cloud deployment status
 
-Project creation in codexanjan's Org was authorized. Supabase quoted a base project cost of 0 per month. Its connector requires a separate cost confirmation; this remains pending. No new project or database was provisioned and no unrelated existing project was modified. `/api/config` exposes only publishable configuration when configured; no privileged key is in browser source.
+The approved LabelProof project is active in codexanjan's Org (Mumbai). Its quoted base cost was 0 per month. Database migrations, private image bucket, RLS policies and role-checked RPCs are deployed. The live server receives only the URL and publishable key; no privileged key is in browser source.
 
-The cloud adapter and `supabase/schema.sql` are implemented but have not been exercised against a new deployed LabelProof database. Account/team controls correctly explain setup status; they do not fabricate successful authentication.
+Confirmed-account login, team membership, private evidence restoration, repeat-download deduplication, version conflicts, review permissions and cross-organization isolation have been exercised against the deployed database. Public signup and recovery still need custom SMTP and verified redirect configuration; the Supabase dashboard session is not signed in.
 
 ## Still required before production certification
 
-- Provision and test cloud service, email redirects/delivery and account recovery; security-test role/organization isolation and backup restoration.
+- Configure and test public email delivery, confirmation/recovery redirects and real inbox recovery; test a disaster-recovery procedure.
 - Independent legal review and published versioned rules with exact operative clauses. Registry verification remains unconnected.
 - Server-side OCR worker and distributed processing/rate limits, independently of an open browser.
 - Real-world multilingual accuracy and accessibility/device evaluation.
@@ -36,7 +36,7 @@ This release adds operational features; it does not claim all production gates a
 
 ## Verification
 
-22 unit checks passed. Original button and browser suites passed. Upgrade suite verified new routes, comparison, version-specific preliminary decisions, capture reload recovery and real batch OCR. Live Vercel routes and original OCR/backup workflow are checked after deployment. The cloud security/schema integration remains unprovisioned and unverified, as explained above.
+22 unit checks passed. Original button and browser suites passed. Upgrade suite verified new routes, comparison, version-specific preliminary decisions, capture reload recovery and real batch OCR. Live Vercel routes and original OCR/backup workflow are checked after deployment. Twelve cloud verification groups now pass; see CLOUD_ACTIVATION.md for scope and remaining email limitations.
 
 ## v3.0.1 storage recovery
 

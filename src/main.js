@@ -606,15 +606,27 @@ async function exportBundle(scanId = null) {
   );
   await refresh();
 }
-async function importBackup(file) {
+async function importBackup(file, cloudImport = null) {
   if (!file) return;
   if (file.size > 80 * 1024 * 1024)
     return toast("Backup is too large. Use a file under 80 MB.");
   const input = validateBackup(JSON.parse(await file.text()));
-  const scanIds = new Map(input.scans.map((scan) => [scan.id, id()])),
-    imageIds = new Map(input.images.map((image) => [image.id, id()])),
+  const mappedId = (store, remoteId) => {
+    if (!cloudImport) return id();
+    const map = (cloudImport.maps[store] ||= {});
+    return (map[remoteId] ||= id());
+  };
+  const scanIds = new Map(
+      input.scans.map((scan) => [scan.id, mappedId("scans", scan.id)]),
+    ),
+    imageIds = new Map(
+      input.images.map((image) => [image.id, mappedId("images", image.id)]),
+    ),
     assessmentIds = new Map(
-      input.assessments.map((assessment) => [assessment.id, id()]),
+      input.assessments.map((assessment) => [
+        assessment.id,
+        mappedId("assessments", assessment.id),
+      ]),
     );
   const images = [];
   for (const original of input.images) {
@@ -682,6 +694,13 @@ async function importBackup(file) {
           confidence: Number.isFinite(l.confidence) ? l.confidence : null,
         })),
     };
+    if (
+      cloudImport &&
+      blob &&
+      original.sha256 &&
+      original.sha256 !== record.sha256
+    )
+      throw new Error("Cloud evidence hash does not match the original photo.");
     images.push(record);
   }
   const assessments = input.assessments.map((original) => ({
@@ -690,7 +709,8 @@ async function importBackup(file) {
     version: original.version,
     createdAt: original.createdAt,
     reason:
-      "Imported: " + String(original.reason || "assessment").slice(0, 120),
+      (cloudImport ? "" : "Imported: ") +
+      String(original.reason || "assessment").slice(0, 120),
     reviewer: String(original.reviewer || "Imported reviewer").slice(0, 80),
     rulePack: String(original.rulePack || RULE_PACK).slice(0, 100),
     pipeline: String(original.pipeline || PIPELINE).slice(0, 100),
@@ -783,7 +803,7 @@ async function importBackup(file) {
       (e) => typeof e.message === "string" && Number.isFinite(Date.parse(e.at)),
     )
     .map((e) => ({
-      id: id(),
+      id: mappedId("events", e.id),
       scanId: scanIds.get(e.scanId) || null,
       type: "imported_" + String(e.type || "event").slice(0, 40),
       message: String(e.message).slice(0, 3000),
@@ -794,7 +814,7 @@ async function importBackup(file) {
     .slice(0, 500)
     .filter((d) => typeof d.title === "string" && typeof d.note === "string")
     .map((d) => ({
-      id: id(),
+      id: mappedId("drafts", d.id),
       title: d.title.slice(0, 120),
       note: d.note.slice(0, 5000),
       source: sources.some((s) => s.id === d.source) ? d.source : "lm",
@@ -821,7 +841,7 @@ async function importBackup(file) {
         ),
     )
     .map((r) => ({
-      id: id(),
+      id: mappedId("operations", r.id),
       type: "workflow",
       action: r.action,
       scanId: scanIds.get(r.scanId),
@@ -864,12 +884,17 @@ async function importBackup(file) {
     ],
     "readwrite",
     (stores) => {
-      scans.forEach((s) => stores.scans.add(s));
-      images.forEach((i) => stores.images.add(i));
-      assessments.forEach((a) => stores.assessments.add(a));
-      importedEvents.forEach((e) => stores.events.add(e));
-      importedDrafts.forEach((d) => stores.drafts.add(d));
-      importedOperations.forEach((record) => stores.operations.add(record));
+      const write = (store, records) =>
+        records.forEach((record) =>
+          cloudImport ? stores[store].put(record) : stores[store].add(record),
+        );
+      write("scans", scans);
+      write("images", images);
+      write("assessments", assessments);
+      write("events", importedEvents);
+      write("drafts", importedDrafts);
+      write("operations", importedOperations);
+      if (cloudImport) stores.operations.put(cloudImport);
       stores.settings.put(preferences);
       stores.events.add({
         id: id(),
@@ -1430,7 +1455,7 @@ window.addEventListener("error", (e) =>
     .catch(() => {}),
 );
 window.addEventListener("labelproof-auth", () => {
-  if (route().view === "account") render();
+  if (["account", "team", "operations"].includes(route().view)) render();
 });
 let batchStop = false,
   batchRunning = false;
@@ -1510,29 +1535,63 @@ async function cloudRPC(name, args) {
   if (error) throw error;
   return data;
 }
-let cloudVersion = 0;
-let cloudOrganization = null;
+function cloudBaseline(orgId) {
+  if (!cloudStatus.user)
+    throw new Error("Sign in before accessing a cloud workspace.");
+  if (!/^[0-9a-f-]{36}$/i.test(orgId))
+    throw new Error("Choose an organization first.");
+  const baselineId = "cloud-baseline:" + cloudStatus.user.id + ":" + orgId;
+  return structuredClone(
+    data.operations.find((r) => r.id === baselineId) || {
+      id: baselineId,
+      type: "cloudBaseline",
+      organization: orgId,
+      user: cloudStatus.user.id,
+      version: 0,
+      maps: {},
+    },
+  );
+}
+function remoteId(baseline, store, localId) {
+  return (
+    Object.entries(baseline.maps[store] || {}).find(
+      ([, value]) => value === localId,
+    )?.[0] || localId
+  );
+}
 async function cloudUpload(orgId) {
   const c = cloudClient();
+  const baseline = cloudBaseline(orgId);
   const { data: remote, error } = await c
     .from("lp_snapshots")
     .select("version")
     .eq("org_id", orgId)
     .maybeSingle();
   if (error) throw error;
-  if (
-    (remote?.version || 0) > 0 &&
-    (cloudOrganization !== orgId || remote.version !== cloudVersion)
-  )
+  if ((remote?.version || 0) > 0 && remote.version !== baseline.version)
     throw new Error("Cloud changed. Download latest before publishing.");
-  cloudVersion = remote?.version || 0;
-  cloudOrganization = orgId;
+  const cloudVersion = remote?.version || 0;
+  for (const store of [
+    "scans",
+    "images",
+    "assessments",
+    "events",
+    "drafts",
+    "operations",
+  ]) {
+    const map = (baseline.maps[store] ||= {});
+    for (const record of data[store]) {
+      let key = remoteId(baseline, store, record.id);
+      if (map[key] && map[key] !== record.id) key = id();
+      map[key] = record.id;
+    }
+  }
   const images = [];
   for (const image of data.images) {
     const clean = cleanImage(image);
     delete clean.blob;
     if (image.blob) {
-      const path = orgId + "/" + image.id;
+      const path = orgId + "/" + remoteId(baseline, "images", image.id);
       const { error } = await c.storage
         .from("labelproof-evidence")
         .upload(path, image.blob, {
@@ -1555,15 +1614,33 @@ async function cloudUpload(orgId) {
     drafts: data.drafts,
     operations: data.operations.filter((r) => r.type === "workflow"),
   };
-  cloudVersion = await cloudRPC("lp_save_snapshot", {
+  const inverse = new Map(
+    Object.values(baseline.maps).flatMap((map) =>
+      Object.entries(map).map(([remote, local]) => [local, remote]),
+    ),
+  );
+  const remap = (value) =>
+    typeof value === "string"
+      ? inverse.get(value) || value
+      : Array.isArray(value)
+        ? value.map(remap)
+        : value && typeof value === "object"
+          ? Object.fromEntries(
+              Object.entries(value).map(([key, item]) => [key, remap(item)]),
+            )
+          : value;
+  baseline.version = await cloudRPC("lp_save_snapshot", {
     organization: orgId,
     expected_version: cloudVersion,
-    payload,
+    payload: remap(payload),
   });
-  toast("Private cloud snapshot saved. Version " + cloudVersion);
+  await storage.put("operations", baseline);
+  await refresh();
+  toast("Private cloud snapshot saved. Version " + baseline.version);
 }
 async function cloudPull(orgId) {
   const c = cloudClient();
+  const baseline = cloudBaseline(orgId);
   const { data: row, error } = await c
     .from("lp_snapshots")
     .select("payload,version")
@@ -1573,6 +1650,8 @@ async function cloudPull(orgId) {
   const payload = row.payload;
   for (const image of payload.images) {
     if (image.storagePath) {
+      if (!image.storagePath.startsWith(orgId + "/"))
+        throw new Error("Evidence path belongs to another organization.");
       const { data: blob, error } = await c.storage
         .from("labelproof-evidence")
         .download(image.storagePath);
@@ -1585,14 +1664,16 @@ async function cloudPull(orgId) {
       delete image.storagePath;
     }
   }
+  baseline.version = row.version;
   await importBackup(
     new File([JSON.stringify(payload)], "cloud.json", {
       type: "application/json",
     }),
+    baseline,
   );
-  cloudVersion = row.version;
-  cloudOrganization = orgId;
-  toast("Cloud records restored as new local products.");
+  toast(
+    "Cloud workspace merged. Existing cloud records updated without duplicates.",
+  );
 }
 document.addEventListener("click", async (e) => {
   const el = e.target.closest("[data-extra]");
@@ -1601,6 +1682,10 @@ document.addEventListener("click", async (e) => {
   try {
     const action = el.dataset.extra;
     if (action === "reload") location.reload();
+    if (action === "choose-org") {
+      $("#org-id").value = el.dataset.organization;
+      toast("Organization selected.");
+    }
     if (
       ["login", "signup", "recovery", "password", "logout"].includes(action)
     ) {
@@ -1685,7 +1770,10 @@ document.addEventListener("click", async (e) => {
       if (error) throw error;
       $("#org-list").innerHTML =
         orgs
-          .map((o) => `<p><b>${esc(o.name)}</b> <code>${esc(o.id)}</code></p>`)
+          .map(
+            (o) =>
+              `<p><b>${esc(o.name)}</b> <code>${esc(o.id)}</code> <button class="secondary" data-extra="choose-org" data-organization="${esc(o.id)}">Select</button></p>`,
+          )
           .join("") || "No organizations yet.";
     }
     if (action === "add-member") {
@@ -1703,6 +1791,24 @@ document.addEventListener("click", async (e) => {
         .eq("org_id", $("#org-id").value.trim());
       if (error) throw error;
       $("#team-result").textContent = JSON.stringify(members, null, 2);
+    }
+    if (action === "cloud-reviews") {
+      const { data: reviews, error } = await cloudClient()
+        .from("lp_review_events")
+        .select(
+          "assessment_id,action,note,actor,at,snapshot_version,assessment_sha256",
+        )
+        .eq("org_id", $("#workflow-org").value.trim())
+        .order("at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      $("#cloud-review-list").innerHTML =
+        reviews
+          .map(
+            (r) =>
+              `<p><b>${esc(r.action)}</b> · ${esc(r.note)}<br><small>By ${esc(r.actor)} · snapshot ${esc(r.snapshot_version)} · ${esc(r.at)}<br>Assessment: ${esc(r.assessment_id)}<br>SHA-256: ${esc(r.assessment_sha256)}</small></p>`,
+          )
+          .join("") || "No server review records yet.";
     }
     if (action === "sync-cloud") await cloudUpload($("#org-id").value.trim());
     if (action === "pull-cloud") await cloudPull($("#org-id").value.trim());
@@ -1727,7 +1833,11 @@ document.addEventListener("click", async (e) => {
         }[action];
         await cloudRPC("lp_review", {
           organization,
-          assessment: assessment.id,
+          assessment: remoteId(
+            cloudBaseline(organization),
+            "assessments",
+            assessment.id,
+          ),
           review_action: reviewAction,
           review_note: note,
         });

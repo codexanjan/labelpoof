@@ -864,6 +864,7 @@ textarea {
 }
 .capture-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
   margin-top: 22px;
@@ -2572,9 +2573,15 @@ td {
 }
 .settings-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 22px;
   align-items: start;
+}
+.settings-grid > * {
+  min-width: 0;
+}
+.panel code {
+  overflow-wrap: anywhere;
 }
 .settings-copy {
   font-size: 11px;

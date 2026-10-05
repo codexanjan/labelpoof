@@ -1,8 +1,16 @@
 let client;
-export let cloudStatus = { configured: false, user: null, error: null };
+export let cloudStatus = {
+  configured: false,
+  user: null,
+  error: null,
+  recovery: false,
+};
 export async function initCloud() {
   try {
-    const r = await fetch("/api/config");
+    const r = await fetch("/api/config", {
+      signal: AbortSignal.timeout(8000),
+      cache: "no-store",
+    });
     if (!r.ok) return;
     const config = await r.json();
     if (!config.url || !config.publishableKey) return;
@@ -13,6 +21,7 @@ export async function initCloud() {
     cloudStatus.user = data.session?.user || null;
     client.auth.onAuthStateChange((event, session) => {
       cloudStatus.user = session?.user || null;
+      cloudStatus.recovery = event === "PASSWORD_RECOVERY";
       window.dispatchEvent(
         new CustomEvent("labelproof-auth", { detail: event }),
       );
@@ -45,6 +54,16 @@ export async function authAction(action, email, password) {
     });
   if (action === "password") result = await c.auth.updateUser({ password });
   if (action === "logout") result = await c.auth.signOut();
-  if (result?.error) throw result.error;
+  if (result?.error) {
+    if (
+      /email address not authorized|email.*not allowed|email rate limit|error sending confirmation email/i.test(
+        result.error.message,
+      )
+    )
+      throw new Error(
+        "Account email delivery is not ready for public users. The administrator needs to configure an email provider.",
+      );
+    throw result.error;
+  }
   return result;
 }

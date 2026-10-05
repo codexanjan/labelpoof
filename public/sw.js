@@ -1,4 +1,4 @@
-const CACHE = "labelproof-shell-v3.0.1";
+const CACHE = "labelproof-shell-v3.1.0";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches

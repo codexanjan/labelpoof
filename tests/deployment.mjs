@@ -38,7 +38,12 @@ try {
   );
   const health = await page.request.get(origin + "/api/health");
   assert.equal(health.status(), 200);
-  assert.equal((await health.json()).version, "3.0.1");
+  const healthBody = await health.json();
+  assert.equal(healthBody.version, "3.1.0");
+  assert.equal(healthBody.cloudConfigured, true);
+  const config = await (await page.request.get(origin + "/api/config")).json();
+  assert.equal(config.cloudConfigured, true);
+  assert(config.publishableKey.startsWith("sb_publishable_"));
   const sourceResponse = await page.request.get(origin + "/api/sources");
   assert.equal(sourceResponse.status(), 200);
   const manifest = await sourceResponse.json();

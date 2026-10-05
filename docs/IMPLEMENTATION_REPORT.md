@@ -22,7 +22,7 @@ The generated fixture is a functional test, not an accuracy benchmark. Hindi set
 
 ## Known limits
 
-No cloud authentication or shared database; no government registry integration; no validated legal rule publication; no calibrated field-level quality model; no logo/symbol detection; no laboratory/product-content validation. Suggested surface positions and OCR confidence are heuristics. Local audit history is editable by the device owner. Client-side PDF export includes findings and original evidence images; text pages are rasterized for browser script shaping.
+Cloud authentication for confirmed accounts, private storage and a shared database are now deployed and tested; public auth email delivery/redirects still require configuration; no government registry integration; no validated legal rule publication; no calibrated field-level quality model; no logo/symbol detection; no laboratory/product-content validation. Suggested surface positions and OCR confidence are heuristics. Local audit history is editable by the device owner. Client-side PDF export includes findings and original evidence images; text pages are rasterized for browser script shaping.
 
 ## Repository deliverables
 
@@ -35,3 +35,7 @@ Vercel deployment was performed directly. Automatic GitHub linking was attempted
 ## v2.1 interaction repair
 
 Downloadable PDF, queue-specific rescan guidance, preserved imported comparison evidence, mobile dismissal, OCR cancellation/timeout/error recovery, repeat-save guards, retryable file input and history recovery. See [button audit](BUTTON_AUDIT.md). Unit checks, browser workflow, focused button audit, real OCR and OCR failure checks passed before deployment.
+
+## Cloud release 3.1
+
+See [CLOUD_ACTIVATION.md](CLOUD_ACTIVATION.md) for deployed database controls, cross-device sync tests, security checks, login limitations and remaining production gates. Repeat cloud downloads now reuse stable local mappings; a stale browser cannot publish over another reviewer’s newer snapshot. Account buttons wrap correctly on narrow panels.

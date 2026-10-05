@@ -1,4 +1,5 @@
 -- LabelProof isolated schema: browser publishable key, RLS and server role checks.
+-- Apply this file first, then 002_review_bindings.sql.
 create schema if not exists lp_private;
 revoke all on schema lp_private from public;
 grant usage on schema lp_private to authenticated;
@@ -39,3 +40,10 @@ insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)va
 create policy evidence_read on storage.objects for select to authenticated using(bucket_id='labelproof-evidence' and lp_private.member_role(((storage.foldername(name))[1])::uuid) is not null);
 create policy evidence_upload on storage.objects for insert to authenticated with check(bucket_id='labelproof-evidence' and lp_private.member_role(((storage.foldername(name))[1])::uuid) is not null);
 create policy evidence_delete on storage.objects for delete to authenticated using(bucket_id='labelproof-evidence' and lp_private.member_role(((storage.foldername(name))[1])::uuid)='admin');
+create index lp_orgs_created_by_idx on public.lp_orgs(created_by);
+create index lp_members_user_id_idx on public.lp_members(user_id);
+create index lp_snapshots_updated_by_idx on public.lp_snapshots(updated_by);
+create index lp_audit_org_at_idx on public.lp_audit(org_id,at);
+create index lp_audit_actor_idx on public.lp_audit(actor);
+create index lp_review_org_assessment_idx on public.lp_review_events(org_id,assessment_id);
+create index lp_review_actor_idx on public.lp_review_events(actor);

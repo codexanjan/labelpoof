@@ -1,6 +1,6 @@
 # LabelProof — Evidence, not assumptions
 
-**SIH26034 concept · Packaged-food label review workspace · Version 3.0**
+**SIH26034 concept · Packaged-food label review workspace · Version 3.1**
 
 Scan a packaged product, follow its image evidence, and understand what was observed, what is unreadable, and what still needs a photograph. LabelProof turns label review into a transparent, traceable workflow.
 
@@ -12,7 +12,7 @@ Scan a packaged product, follow its image evidence, and understand what was obse
 
 [Complete release and readiness report](docs/V3_RELEASE.md).
 
-Added persistent capture drafts, resumable browser batches, barcode reading, quality hints, reviewer assignments/comments/preliminary approvals, comparisons, rule-review drafts, an English searchable PDF layer, retention reminders, offline app shell and six new workspace pages. Account/team/private-storage integration and server-enforced organization schema are included; cloud provisioning awaits the required cost confirmation. Legal validation, registry integration and a remote OCR worker remain unimplemented. This release is not certified production-ready.
+Added persistent capture drafts, resumable browser batches, barcode reading, quality hints, reviewer assignments/comments/preliminary approvals, comparisons, rule-review drafts, an English searchable PDF layer, retention reminders, offline app shell and six new workspace pages. Account/team/private-storage integration and server-enforced organization schema are included; the approved LabelProof cloud project is active in Mumbai, with private images, password login for confirmed accounts, team roles and version-checked workspace sync. Public signup/recovery delivery and redirects await email-provider setup and a Supabase dashboard session. Legal validation, registry integration and a remote OCR worker remain unimplemented. This release is not certified production-ready.
 
 ## Interaction fixes in v2.1
 
@@ -45,7 +45,7 @@ The original single-screen prototype has become a separate dashboard with nine w
 
 OCR detects declaration text. It does not automatically validate every clause, category exception, effective date, physical font size, nutrition value or licence authenticity. Source references are official entry points, not a published legal rule pack. Applicability starts as unknown; reviewers can record their assessment with a rationale.
 
-The current deployment stores workspace data in the user's browser. It does **not** include cloud accounts, shared reviewer permissions, a deployed PostgreSQL database or an official registry-verification integration. The production database schema and backend expansion are documented as future work, separately from implemented features.
+The deployment supports local IndexedDB plus an active Supabase PostgreSQL database, confirmed-account authentication, private evidence storage and server-enforced organization roles. Cloud upload/download are explicit actions on Team & cloud. Public account email delivery and recovery redirects still need configuration. Government registry verification, validated legal rules, remote OCR workers, automatic backup restoration, account deletion and external incident alerts remain release gates. See [cloud activation and verification](docs/CLOUD_ACTIVATION.md).
 
 ## Features and routes
 
@@ -62,9 +62,15 @@ The current deployment stores workspace data in the user's browser. It does **no
 | Analytics | `/dashboard/analytics` | Observation distribution, capture coverage and open checks; no invented compliance score |
 | Rule library | `/dashboard/rules` | Official references, detector inventory and persistent draft review notes |
 | Activity timeline | `/dashboard/activity` | Scans, corrections, exports, imports, preferences and draft changes |
+| Account | `/dashboard/account` | Confirmed-account login/logout, password update, signup/recovery controls with email-setup status |
+| Team & cloud | `/dashboard/team` | Organization creation/selection, server-enforced roles, private image upload and version-checked snapshot sync |
+| Processing | `/dashboard/processing` | Persistent browser batches, retry and interruption recovery |
+| Review workflow | `/dashboard/approvals` | Local preliminary decisions and server role-checked team review records bound to a snapshot and assessment hash |
+| Comparison | `/dashboard/compare` | Side-by-side assessment findings |
+| Readiness | `/dashboard/operations` | Health checks, review drafts and evaluation exports |
 | Settings | `/dashboard/settings` | Workspace/reviewer names, OCR language, uncertainty threshold, backup/import and deletion |
 
-All pages are usable on desktop and mobile. The mobile navigation opens from the menu button. Imported records get new identifiers so an import cannot overwrite existing assessments.
+All pages are usable on desktop and mobile. The mobile navigation opens from the menu button. File-backup imports get new identifiers. Cloud downloads retain a per-account, per-organization ID mapping, so repeated downloads update matching cloud records without duplicates. Unrelated local records remain available; export unsynced work before downloading.
 
 ## The evidence model
 

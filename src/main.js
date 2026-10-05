@@ -1687,7 +1687,9 @@ document.addEventListener("click", async (e) => {
       toast("Organization selected.");
     }
     if (
-      ["login", "signup", "recovery", "password", "logout"].includes(action)
+      ["login", "signup", "recovery", "password", "logout", "demo"].includes(
+        action,
+      )
     ) {
       const email = $("#account-email").value.trim(),
         password = $("#account-password").value;

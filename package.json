@@ -1,6 +1,6 @@
 {
   "name": "labelproof",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "description": "Evidence-backed packaged-food label review dashboard with browser OCR, image evidence and versioned reports.",
   "type": "module",
@@ -16,6 +16,7 @@
     "test:ocr-errors": "node tests/ocr-errors.mjs",
     "test:deployment": "node tests/deployment.mjs",
     "test:upgrades": "node tests/upgrades.mjs",
+    "test:demo": "node --env-file=.env.local tests/demo-access.mjs",
     "test:storage": "node tests/storage-upgrade.mjs"
   },
   "dependencies": {

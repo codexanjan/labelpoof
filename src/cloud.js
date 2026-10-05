@@ -1,3 +1,4 @@
+import { DEMO_ACCESS, isDemoUser } from "./demo-access.js";
 let client;
 export let cloudStatus = {
   configured: false,
@@ -39,6 +40,12 @@ export const cloudClient = () => {
 };
 export async function authAction(action, email, password) {
   const c = cloudClient();
+  if (action === "demo")
+    return authAction("login", DEMO_ACCESS.email, DEMO_ACCESS.password);
+  if (isDemoUser(cloudStatus.user) && ["password", "recovery"].includes(action))
+    throw new Error(
+      "The shared demo account is read-only. Use your own account for password changes.",
+    );
   let result;
   if (action === "signup")
     result = await c.auth.signUp({
@@ -53,7 +60,10 @@ export async function authAction(action, email, password) {
       redirectTo: location.origin + "/dashboard/account",
     });
   if (action === "password") result = await c.auth.updateUser({ password });
-  if (action === "logout") result = await c.auth.signOut();
+  if (action === "logout")
+    result = await c.auth.signOut({
+      scope: isDemoUser(cloudStatus.user) ? "local" : "global",
+    });
   if (result?.error) {
     if (
       /email address not authorized|email.*not allowed|email rate limit|error sending confirmation email/i.test(

@@ -1,0 +1,1575 @@
+{
+  "format": "labelproof-workspace",
+  "schemaVersion": 2,
+  "scans": [
+    {
+      "id": "demo-oats",
+      "name": "Honestly Good Oats",
+      "brand": "Earth & Grain",
+      "category": "Cereals & grains",
+      "origin": "Domestic",
+      "demo": true,
+      "productImage": "/images/oats-pack.svg",
+      "createdAt": "2026-10-05T14:31:14.701Z",
+      "updatedAt": "2026-10-05T14:31:14.701Z",
+      "latestAssessmentId": "demo-oats-v1"
+    },
+    {
+      "id": "demo-tea",
+      "name": "Mountain Morning Tea",
+      "brand": "Hill & Kettle",
+      "category": "Tea & beverages",
+      "origin": "Domestic",
+      "demo": true,
+      "productImage": "/images/tea-pack.svg",
+      "createdAt": "2026-10-04T14:31:14.704Z",
+      "updatedAt": "2026-10-04T14:31:14.704Z",
+      "latestAssessmentId": "demo-tea-v1"
+    },
+    {
+      "id": "demo-snack",
+      "name": "Sunny Crunch Mix",
+      "brand": "Little Harvest",
+      "category": "Snacks & mixes",
+      "origin": "Domestic",
+      "demo": true,
+      "productImage": "/images/snack-pack.svg",
+      "createdAt": "2026-10-03T14:31:14.705Z",
+      "updatedAt": "2026-10-03T14:31:14.705Z",
+      "latestAssessmentId": "demo-snack-v1"
+    }
+  ],
+  "images": [
+    {
+      "id": "demo-oats-back",
+      "scanId": "demo-oats",
+      "surface": "Back",
+      "fixture": "/images/oats-label.svg",
+      "width": 600,
+      "height": 900,
+      "quality": "Readable",
+      "text": "Net Wt. 400 g\nMRP: Rs. 180.00\nManufactured by Demo Foods, Pune 411001\nFSSAI: 12345678901234\nIngredients: 100% wholegrain oats\nConsumer care: care@example.test\nNutrition information: Energy 380 kcal per 100 g\nContains: oats\nCountry of origin: India\nStore in a cool and dry place",
+      "confidence": null,
+      "demo": true,
+      "createdAt": "2026-10-05T14:31:14.701Z",
+      "lines": [
+        {
+          "text": "Net Wt. 400 g",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 225,
+            "x1": 555,
+            "y1": 253
+          }
+        },
+        {
+          "text": "MRP: Rs. 180.00",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 272,
+            "x1": 555,
+            "y1": 300
+          }
+        },
+        {
+          "text": "Manufactured by Demo Foods, Pune 411001",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 319,
+            "x1": 555,
+            "y1": 347
+          }
+        },
+        {
+          "text": "FSSAI: 12345678901234",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 366,
+            "x1": 555,
+            "y1": 394
+          }
+        },
+        {
+          "text": "Ingredients: 100% wholegrain oats",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 413,
+            "x1": 555,
+            "y1": 441
+          }
+        },
+        {
+          "text": "Consumer care: care@example.test",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 460,
+            "x1": 555,
+            "y1": 488
+          }
+        },
+        {
+          "text": "Nutrition information: Energy 380 kcal per 100 g",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 507,
+            "x1": 555,
+            "y1": 535
+          }
+        },
+        {
+          "text": "Contains: oats",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 554,
+            "x1": 555,
+            "y1": 582
+          }
+        },
+        {
+          "text": "Country of origin: India",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 601,
+            "x1": 555,
+            "y1": 629
+          }
+        },
+        {
+          "text": "Store in a cool and dry place",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 648,
+            "x1": 555,
+            "y1": 676
+          }
+        }
+      ]
+    },
+    {
+      "id": "demo-snack-back",
+      "scanId": "demo-snack",
+      "surface": "Back",
+      "fixture": "/images/snack-label.svg",
+      "width": 600,
+      "height": 900,
+      "quality": "Readable",
+      "text": "Net Wt. 150 g\nManufactured by Demo Snacks, Mumbai 400001\nFSSAI: 34567890123456\nBatch no: SN2601\nBest before: 30 June 2027\nIngredients: Peanuts, chickpeas, salt\nConsumer care: snacks@example.test\nNutrition information: Energy 480 kcal per 100 g\nContains: peanuts\nCountry of origin: India\nStore in a cool dry place",
+      "confidence": null,
+      "demo": true,
+      "createdAt": "2026-10-03T14:31:14.705Z",
+      "lines": [
+        {
+          "text": "Net Wt. 150 g",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 225,
+            "x1": 555,
+            "y1": 253
+          }
+        },
+        {
+          "text": "Manufactured by Demo Snacks, Mumbai 400001",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 272,
+            "x1": 555,
+            "y1": 300
+          }
+        },
+        {
+          "text": "FSSAI: 34567890123456",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 319,
+            "x1": 555,
+            "y1": 347
+          }
+        },
+        {
+          "text": "Batch no: SN2601",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 366,
+            "x1": 555,
+            "y1": 394
+          }
+        },
+        {
+          "text": "Best before: 30 June 2027",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 413,
+            "x1": 555,
+            "y1": 441
+          }
+        },
+        {
+          "text": "Ingredients: Peanuts, chickpeas, salt",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 460,
+            "x1": 555,
+            "y1": 488
+          }
+        },
+        {
+          "text": "Consumer care: snacks@example.test",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 507,
+            "x1": 555,
+            "y1": 535
+          }
+        },
+        {
+          "text": "Nutrition information: Energy 480 kcal per 100 g",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 554,
+            "x1": 555,
+            "y1": 582
+          }
+        },
+        {
+          "text": "Contains: peanuts",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 601,
+            "x1": 555,
+            "y1": 629
+          }
+        },
+        {
+          "text": "Country of origin: India",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 648,
+            "x1": 555,
+            "y1": 676
+          }
+        },
+        {
+          "text": "Store in a cool dry place",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 695,
+            "x1": 555,
+            "y1": 723
+          }
+        }
+      ]
+    },
+    {
+      "id": "demo-tea-back",
+      "scanId": "demo-tea",
+      "surface": "Back",
+      "fixture": "/images/tea-label.svg",
+      "width": 600,
+      "height": 900,
+      "quality": "Readable",
+      "text": "Net Wt. 250 g\nMRP: Rs. 240.00\nManufactured by Demo Tea Co, Darjeeling 734101\nFSSAI: 23456789012345\nBatch no: TEA2601\nBest before: 31 December 2027\nIngredients: Black tea\nConsumer care: hello@example.test\nCountry of origin: India\nStore in a cool dry place",
+      "confidence": null,
+      "demo": true,
+      "createdAt": "2026-10-04T14:31:14.704Z",
+      "lines": [
+        {
+          "text": "Net Wt. 250 g",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 225,
+            "x1": 555,
+            "y1": 253
+          }
+        },
+        {
+          "text": "MRP: Rs. 240.00",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 272,
+            "x1": 555,
+            "y1": 300
+          }
+        },
+        {
+          "text": "Manufactured by Demo Tea Co, Darjeeling 734101",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 319,
+            "x1": 555,
+            "y1": 347
+          }
+        },
+        {
+          "text": "FSSAI: 23456789012345",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 366,
+            "x1": 555,
+            "y1": 394
+          }
+        },
+        {
+          "text": "Batch no: TEA2601",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 413,
+            "x1": 555,
+            "y1": 441
+          }
+        },
+        {
+          "text": "Best before: 31 December 2027",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 460,
+            "x1": 555,
+            "y1": 488
+          }
+        },
+        {
+          "text": "Ingredients: Black tea",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 507,
+            "x1": 555,
+            "y1": 535
+          }
+        },
+        {
+          "text": "Consumer care: hello@example.test",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 554,
+            "x1": 555,
+            "y1": 582
+          }
+        },
+        {
+          "text": "Country of origin: India",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 601,
+            "x1": 555,
+            "y1": 629
+          }
+        },
+        {
+          "text": "Store in a cool dry place",
+          "confidence": null,
+          "bbox": {
+            "x0": 45,
+            "y0": 648,
+            "x1": 555,
+            "y1": 676
+          }
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "id": "demo-oats-v1",
+      "scanId": "demo-oats",
+      "version": 1,
+      "createdAt": "2026-10-05T14:31:14.701Z",
+      "reason": "Synthetic example loaded",
+      "rulePack": "declaration-observations-2.0",
+      "pipeline": "browser-ocr-2.0",
+      "imageIds": [
+        "demo-oats-back"
+      ],
+      "imageSnapshots": [
+        {
+          "id": "demo-oats-back",
+          "fixture": "/images/oats-label.svg",
+          "surface": "Back",
+          "quality": "Readable",
+          "width": 600,
+          "height": 900
+        }
+      ],
+      "productSnapshot": {
+        "name": "Honestly Good Oats",
+        "brand": "Earth & Grain",
+        "category": "Cereals & grains",
+        "origin": "Domestic",
+        "demo": true
+      },
+      "findings": [
+        {
+          "key": "quantity",
+          "name": "Net quantity",
+          "source": "lm",
+          "surface": "Front",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Net Wt. 400 g",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 225,
+            "x1": 555,
+            "y1": 253
+          },
+          "observations": [
+            {
+              "value": "Net Wt. 400 g",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 225,
+                "x1": 555,
+                "y1": 253
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "price",
+          "name": "Retail price (MRP)",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "MRP: Rs. 180.00",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 272,
+            "x1": 555,
+            "y1": 300
+          },
+          "observations": [
+            {
+              "value": "MRP: Rs. 180.00",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 272,
+                "x1": 555,
+                "y1": 300
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "manufacturer",
+          "name": "Manufacturer details",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Manufactured by Demo Foods, Pune 411001",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 319,
+            "x1": 555,
+            "y1": 347
+          },
+          "observations": [
+            {
+              "value": "Manufactured by Demo Foods, Pune 411001",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 319,
+                "x1": 555,
+                "y1": 347
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "licence",
+          "name": "FSSAI declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "FSSAI: 12345678901234",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 366,
+            "x1": 555,
+            "y1": 394
+          },
+          "observations": [
+            {
+              "value": "FSSAI: 12345678901234",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 366,
+                "x1": 555,
+                "y1": 394
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": "",
+          "registryVerification": "NOT_ATTEMPTED"
+        },
+        {
+          "key": "batch",
+          "name": "Batch / lot number",
+          "source": "fssai",
+          "surface": "Bottom",
+          "status": "not_captured",
+          "applicability": "unknown",
+          "value": "",
+          "imageId": null,
+          "box": null,
+          "observations": [],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "date",
+          "name": "Date marking",
+          "source": "fssai",
+          "surface": "Bottom",
+          "status": "unreadable",
+          "applicability": "unknown",
+          "value": "",
+          "imageId": "demo-oats-back",
+          "box": null,
+          "observations": [],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "ingredients",
+          "name": "Ingredients",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Ingredients: 100% wholegrain oats",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 413,
+            "x1": 555,
+            "y1": 441
+          },
+          "observations": [
+            {
+              "value": "Ingredients: 100% wholegrain oats",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 413,
+                "x1": 555,
+                "y1": 441
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "care",
+          "name": "Consumer care",
+          "source": "lm",
+          "surface": "Right",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Consumer care: care@example.test",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 460,
+            "x1": 555,
+            "y1": 488
+          },
+          "observations": [
+            {
+              "value": "Consumer care: care@example.test",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 460,
+                "x1": 555,
+                "y1": 488
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "nutrition",
+          "name": "Nutrition declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Nutrition information: Energy 380 kcal per 100 g",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 507,
+            "x1": 555,
+            "y1": 535
+          },
+          "observations": [
+            {
+              "value": "Nutrition information: Energy 380 kcal per 100 g",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 507,
+                "x1": 555,
+                "y1": 535
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "allergen",
+          "name": "Allergen declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Contains: oats",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 554,
+            "x1": 555,
+            "y1": 582
+          },
+          "observations": [
+            {
+              "value": "Contains: oats",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 554,
+                "x1": 555,
+                "y1": 582
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "origin",
+          "name": "Origin declaration",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Country of origin: India",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 601,
+            "x1": 555,
+            "y1": 629
+          },
+          "observations": [
+            {
+              "value": "Country of origin: India",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 601,
+                "x1": 555,
+                "y1": 629
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "storage",
+          "name": "Storage instructions",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Store in a cool and dry place",
+          "imageId": "demo-oats-back",
+          "box": {
+            "x0": 45,
+            "y0": 648,
+            "x1": 555,
+            "y1": 676
+          },
+          "observations": [
+            {
+              "value": "Store in a cool and dry place",
+              "imageId": "demo-oats-back",
+              "box": {
+                "x0": 45,
+                "y0": 648,
+                "x1": 555,
+                "y1": 676
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        }
+      ],
+      "reviewer": "Demo reviewer",
+      "demo": true
+    },
+    {
+      "id": "demo-snack-v1",
+      "scanId": "demo-snack",
+      "version": 1,
+      "createdAt": "2026-10-03T14:31:14.705Z",
+      "reason": "Synthetic example loaded",
+      "rulePack": "declaration-observations-2.0",
+      "pipeline": "browser-ocr-2.0",
+      "imageIds": [
+        "demo-snack-back"
+      ],
+      "imageSnapshots": [
+        {
+          "id": "demo-snack-back",
+          "fixture": "/images/snack-label.svg",
+          "surface": "Back",
+          "quality": "Readable",
+          "width": 600,
+          "height": 900
+        }
+      ],
+      "productSnapshot": {
+        "name": "Sunny Crunch Mix",
+        "brand": "Little Harvest",
+        "category": "Snacks & mixes",
+        "origin": "Domestic",
+        "demo": true
+      },
+      "findings": [
+        {
+          "key": "quantity",
+          "name": "Net quantity",
+          "source": "lm",
+          "surface": "Front",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Net Wt. 150 g",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 225,
+            "x1": 555,
+            "y1": 253
+          },
+          "observations": [
+            {
+              "value": "Net Wt. 150 g",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 225,
+                "x1": 555,
+                "y1": 253
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "price",
+          "name": "Retail price (MRP)",
+          "source": "lm",
+          "surface": "Back",
+          "status": "missing",
+          "applicability": "applies",
+          "value": "",
+          "imageId": "demo-snack-back",
+          "box": null,
+          "observations": [],
+          "humanConfirmed": true,
+          "reviewNote": "Synthetic complete-panel scenario: no retail price is included in the illustrative label. Not an allegation against a real product.",
+          "coverageConfirmed": true,
+          "coverageImageIds": [
+            "demo-snack-back"
+          ]
+        },
+        {
+          "key": "manufacturer",
+          "name": "Manufacturer details",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Manufactured by Demo Snacks, Mumbai 400001",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 272,
+            "x1": 555,
+            "y1": 300
+          },
+          "observations": [
+            {
+              "value": "Manufactured by Demo Snacks, Mumbai 400001",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 272,
+                "x1": 555,
+                "y1": 300
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "licence",
+          "name": "FSSAI declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "FSSAI: 34567890123456",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 319,
+            "x1": 555,
+            "y1": 347
+          },
+          "observations": [
+            {
+              "value": "FSSAI: 34567890123456",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 319,
+                "x1": 555,
+                "y1": 347
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": "",
+          "registryVerification": "NOT_ATTEMPTED"
+        },
+        {
+          "key": "batch",
+          "name": "Batch / lot number",
+          "source": "fssai",
+          "surface": "Bottom",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Batch no: SN2601",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 366,
+            "x1": 555,
+            "y1": 394
+          },
+          "observations": [
+            {
+              "value": "Batch no: SN2601",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 366,
+                "x1": 555,
+                "y1": 394
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "date",
+          "name": "Date marking",
+          "source": "fssai",
+          "surface": "Bottom",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Best before: 30 June 2027",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 413,
+            "x1": 555,
+            "y1": 441
+          },
+          "observations": [
+            {
+              "value": "Best before: 30 June 2027",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 413,
+                "x1": 555,
+                "y1": 441
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "ingredients",
+          "name": "Ingredients",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Ingredients: Peanuts, chickpeas, salt",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 460,
+            "x1": 555,
+            "y1": 488
+          },
+          "observations": [
+            {
+              "value": "Ingredients: Peanuts, chickpeas, salt",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 460,
+                "x1": 555,
+                "y1": 488
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "care",
+          "name": "Consumer care",
+          "source": "lm",
+          "surface": "Right",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Consumer care: snacks@example.test",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 507,
+            "x1": 555,
+            "y1": 535
+          },
+          "observations": [
+            {
+              "value": "Consumer care: snacks@example.test",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 507,
+                "x1": 555,
+                "y1": 535
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "nutrition",
+          "name": "Nutrition declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Nutrition information: Energy 480 kcal per 100 g",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 554,
+            "x1": 555,
+            "y1": 582
+          },
+          "observations": [
+            {
+              "value": "Nutrition information: Energy 480 kcal per 100 g",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 554,
+                "x1": 555,
+                "y1": 582
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "allergen",
+          "name": "Allergen declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Contains: peanuts",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 601,
+            "x1": 555,
+            "y1": 629
+          },
+          "observations": [
+            {
+              "value": "Contains: peanuts",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 601,
+                "x1": 555,
+                "y1": 629
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "origin",
+          "name": "Origin declaration",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Country of origin: India",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 648,
+            "x1": 555,
+            "y1": 676
+          },
+          "observations": [
+            {
+              "value": "Country of origin: India",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 648,
+                "x1": 555,
+                "y1": 676
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "storage",
+          "name": "Storage instructions",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Store in a cool dry place",
+          "imageId": "demo-snack-back",
+          "box": {
+            "x0": 45,
+            "y0": 695,
+            "x1": 555,
+            "y1": 723
+          },
+          "observations": [
+            {
+              "value": "Store in a cool dry place",
+              "imageId": "demo-snack-back",
+              "box": {
+                "x0": 45,
+                "y0": 695,
+                "x1": 555,
+                "y1": 723
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        }
+      ],
+      "reviewer": "Demo reviewer",
+      "demo": true
+    },
+    {
+      "id": "demo-tea-v1",
+      "scanId": "demo-tea",
+      "version": 1,
+      "createdAt": "2026-10-04T14:31:14.704Z",
+      "reason": "Synthetic example loaded",
+      "rulePack": "declaration-observations-2.0",
+      "pipeline": "browser-ocr-2.0",
+      "imageIds": [
+        "demo-tea-back"
+      ],
+      "imageSnapshots": [
+        {
+          "id": "demo-tea-back",
+          "fixture": "/images/tea-label.svg",
+          "surface": "Back",
+          "quality": "Readable",
+          "width": 600,
+          "height": 900
+        }
+      ],
+      "productSnapshot": {
+        "name": "Mountain Morning Tea",
+        "brand": "Hill & Kettle",
+        "category": "Tea & beverages",
+        "origin": "Domestic",
+        "demo": true
+      },
+      "findings": [
+        {
+          "key": "quantity",
+          "name": "Net quantity",
+          "source": "lm",
+          "surface": "Front",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Net Wt. 250 g",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 225,
+            "x1": 555,
+            "y1": 253
+          },
+          "observations": [
+            {
+              "value": "Net Wt. 250 g",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 225,
+                "x1": 555,
+                "y1": 253
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "price",
+          "name": "Retail price (MRP)",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "MRP: Rs. 240.00",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 272,
+            "x1": 555,
+            "y1": 300
+          },
+          "observations": [
+            {
+              "value": "MRP: Rs. 240.00",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 272,
+                "x1": 555,
+                "y1": 300
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "manufacturer",
+          "name": "Manufacturer details",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Manufactured by Demo Tea Co, Darjeeling 734101",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 319,
+            "x1": 555,
+            "y1": 347
+          },
+          "observations": [
+            {
+              "value": "Manufactured by Demo Tea Co, Darjeeling 734101",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 319,
+                "x1": 555,
+                "y1": 347
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "licence",
+          "name": "FSSAI declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "FSSAI: 23456789012345",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 366,
+            "x1": 555,
+            "y1": 394
+          },
+          "observations": [
+            {
+              "value": "FSSAI: 23456789012345",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 366,
+                "x1": 555,
+                "y1": 394
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": "",
+          "registryVerification": "NOT_ATTEMPTED"
+        },
+        {
+          "key": "batch",
+          "name": "Batch / lot number",
+          "source": "fssai",
+          "surface": "Bottom",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Batch no: TEA2601",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 413,
+            "x1": 555,
+            "y1": 441
+          },
+          "observations": [
+            {
+              "value": "Batch no: TEA2601",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 413,
+                "x1": 555,
+                "y1": 441
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "date",
+          "name": "Date marking",
+          "source": "fssai",
+          "surface": "Bottom",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Best before: 31 December 2027",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 460,
+            "x1": 555,
+            "y1": 488
+          },
+          "observations": [
+            {
+              "value": "Best before: 31 December 2027",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 460,
+                "x1": 555,
+                "y1": 488
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "ingredients",
+          "name": "Ingredients",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Ingredients: Black tea",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 507,
+            "x1": 555,
+            "y1": 535
+          },
+          "observations": [
+            {
+              "value": "Ingredients: Black tea",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 507,
+                "x1": 555,
+                "y1": 535
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "care",
+          "name": "Consumer care",
+          "source": "lm",
+          "surface": "Right",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Consumer care: hello@example.test",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 554,
+            "x1": 555,
+            "y1": 582
+          },
+          "observations": [
+            {
+              "value": "Consumer care: hello@example.test",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 554,
+                "x1": 555,
+                "y1": 582
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "nutrition",
+          "name": "Nutrition declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "not_applicable",
+          "applicability": "does_not_apply",
+          "value": "",
+          "imageId": "demo-tea-back",
+          "box": null,
+          "observations": [],
+          "humanConfirmed": true,
+          "reviewNote": "Synthetic scenario for the review workflow. Actual category exceptions have not been legally validated."
+        },
+        {
+          "key": "allergen",
+          "name": "Allergen declaration",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "not_applicable",
+          "applicability": "does_not_apply",
+          "value": "",
+          "imageId": "demo-tea-back",
+          "box": null,
+          "observations": [],
+          "humanConfirmed": true,
+          "reviewNote": "Synthetic scenario for the review workflow. Actual category exceptions have not been legally validated."
+        },
+        {
+          "key": "origin",
+          "name": "Origin declaration",
+          "source": "lm",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Country of origin: India",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 601,
+            "x1": 555,
+            "y1": 629
+          },
+          "observations": [
+            {
+              "value": "Country of origin: India",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 601,
+                "x1": 555,
+                "y1": 629
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        },
+        {
+          "key": "storage",
+          "name": "Storage instructions",
+          "source": "fssai",
+          "surface": "Back",
+          "status": "observed",
+          "applicability": "unknown",
+          "value": "Store in a cool dry place",
+          "imageId": "demo-tea-back",
+          "box": {
+            "x0": 45,
+            "y0": 648,
+            "x1": 555,
+            "y1": 676
+          },
+          "observations": [
+            {
+              "value": "Store in a cool dry place",
+              "imageId": "demo-tea-back",
+              "box": {
+                "x0": 45,
+                "y0": 648,
+                "x1": 555,
+                "y1": 676
+              },
+              "confidence": null
+            }
+          ],
+          "humanConfirmed": false,
+          "reviewNote": ""
+        }
+      ],
+      "reviewer": "Demo reviewer",
+      "demo": true
+    }
+  ],
+  "events": [
+    {
+      "id": "demo-oats-loaded",
+      "scanId": "demo-oats",
+      "type": "demo_loaded",
+      "message": "Honestly Good Oats sample loaded",
+      "at": "2026-10-05T14:31:14.701Z",
+      "actor": "Demo workspace"
+    },
+    {
+      "id": "demo-tea-loaded",
+      "scanId": "demo-tea",
+      "type": "demo_loaded",
+      "message": "Mountain Morning Tea sample loaded",
+      "at": "2026-10-04T14:31:14.704Z",
+      "actor": "Demo workspace"
+    },
+    {
+      "id": "demo-snack-loaded",
+      "scanId": "demo-snack",
+      "type": "demo_loaded",
+      "message": "Sunny Crunch Mix sample loaded",
+      "at": "2026-10-03T14:31:14.705Z",
+      "actor": "Demo workspace"
+    }
+  ],
+  "settings": {
+    "id": "preferences",
+    "workspaceName": "LabelProof Demo",
+    "reviewerName": "Demo reviewer",
+    "language": "eng",
+    "theme": "light",
+    "confidenceThreshold": 35,
+    "initialized": true
+  },
+  "drafts": [],
+  "operations": []
+}

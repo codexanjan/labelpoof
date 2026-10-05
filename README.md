@@ -1,12 +1,25 @@
 # LabelProof — Evidence, not assumptions
 
-**SIH26034 concept · Packaged-food label review workspace · Version 3.1**
+**SIH26034 concept · Packaged-food label review workspace · Version 3.2**
 
 Scan a packaged product, follow its image evidence, and understand what was observed, what is unreadable, and what still needs a photograph. LabelProof turns label review into a transparent, traceable workflow.
 
 **[Open dashboard](https://labelproof-prototype.vercel.app/dashboard)** · **[Public landing page](https://labelproof-prototype.vercel.app/)** · **[Sample report](https://labelproof-prototype.vercel.app/dashboard/scans/demo-oats)** · **[Implementation report](docs/IMPLEMENTATION_REPORT.md)**
 
 ![LabelProof dashboard with product images, observation counts, review queue and activity](docs/images/dashboard.png)
+
+## Demo login
+
+Open [Account & privacy](https://labelproof-prototype.vercel.app/dashboard/account), then choose **Sign in to demo**, or use:
+
+- Email: `demo@labelproof.example`
+- Password: `LabelProofDemo!2026`
+
+These credentials are intentionally public. The real cloud account can read only the **LabelProof Demo** organization, containing three synthetic products. Team edits, cloud uploads, report changes, password/email changes, identity linking and MFA enrollment are blocked on the server. Local experiments are available on your device; use your own account for real product photos. Demo sign-out ends only the current browser session.
+
+To restore the samples from cloud: Team & cloud → Load my organizations → Select LabelProof Demo → Download cloud workspace.
+
+Email provider chosen: **Resend**. The owner currently has no sender domain, so public signup and password-recovery email delivery remain pending domain verification, provider credentials and Supabase dashboard settings. Email confirmation stays enabled. Legal validation and distributed remote OCR remain separate production gates.
 
 ## v3 additions
 

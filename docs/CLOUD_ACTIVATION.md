@@ -34,3 +34,17 @@ Confirmed users sign in at Account & privacy, then use Team & cloud to create/se
 ## Production gates remain
 
 This release is a tested cloud-connected prototype. It still needs public auth email setup, reviewed versioned legal rules, diverse real-package accuracy evaluation, distributed OCR processing, automated backup/restore drills, cloud/account deletion and retention enforcement, and external incident alerts. OCR, local batches and quality signals remain browser-based. Licence format detection does not verify a licence. Preliminary or team approval is not legal certification.
+
+## Demo release 3.2
+
+A confirmed shared demo account (`demo@labelproof.example`, password `LabelProofDemo!2026`) is available without email delivery. Its only membership is the synthetic LabelProof Demo organization. A private, server-controlled demo-account registry blocks every application write RPC and Storage mutation. Auth triggers block password/email/phone changes, identity additions/removal and MFA enrollment for that account; normal users are unaffected. Editable profile metadata cannot grant access. Client controls add one-click sign-in, public credentials and a read-only notice.
+
+Apply `supabase/migrations/20261005142935_demo_read_only_access.sql` after the earlier two schema files. `supabase/demo-snapshot.json` contains synthetic sample records only. Credentials are intentionally public; they do not grant administrator or customer workspace access.
+
+`tests/demo-access.mjs` verifies password sign-in, exactly one visible demo organization, three synthetic products, server denials for org creation/self-promotion/snapshot changes/comments/image uploads, credential and MFA protection, unchanged original password, browser sign-in/download/logout, mobile layout and no runtime errors.
+
+Release 3.2 passed these checks against the live Vercel alias, including all 18 dashboard routes, loaded evidence images and metadata APIs. The normal-account cloud regression passed all 12 groups after the demo protections were installed. Unit checks and production builds passed. Disposable regression accounts and their test data were removed afterward. Demo sign-out uses the current browser session so it does not sign out other demo visitors.
+
+The private demo-account registry deliberately has no client grants or RLS policies: all client access is denied. Its informational RLS advisory does not mean that this private registry is exposed ([advisor details](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)). The known free-plan leaked-password-protection advisory remains.
+
+Resend is selected for public auth email delivery. The owner reported no sender domain, so domain verification is a concrete blocker: no public-delivery success is claimed. See [Resend's Supabase SMTP requirements](https://resend.com/docs/send-with-supabase-smtp). Demo credentials work independently of that email setup.

@@ -4,7 +4,7 @@ export default function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   return res.status(200).json({
     application: "LabelProof",
-    version: "3.1.0",
+    version: "3.2.0",
     status: "ok",
     storage: "browser-indexeddb",
     ocr: "browser-tesseract",

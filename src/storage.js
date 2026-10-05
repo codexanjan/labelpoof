@@ -10,9 +10,11 @@ const STORE_NAMES = [
   "captureDrafts",
 ];
 let database;
+let opening;
 export function openDatabase() {
   if (database) return Promise.resolve(database);
-  return new Promise((resolve, reject) => {
+  if (opening) return opening;
+  opening = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 2);
     request.onupgradeneeded = () => {
       for (const name of STORE_NAMES)
@@ -21,13 +23,36 @@ export function openDatabase() {
     };
     request.onsuccess = () => {
       database = request.result;
+      database.onversionchange = () => {
+        database?.close();
+        database = null;
+        opening = null;
+        window.dispatchEvent(new CustomEvent("labelproof-storage-updated"));
+      };
+      database.onclose = () => {
+        database = null;
+        opening = null;
+      };
+      opening = null;
       resolve(database);
     };
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      opening = null;
+      reject(request.error);
+    };
+    // Blocked means another tab is holding an older connection. Keep the
+    // request alive so it completes as soon as that tab releases its lock.
     request.onblocked = () =>
-      reject(new Error("Close other LabelProof tabs and retry."));
+      window.dispatchEvent(new CustomEvent("labelproof-storage-blocked"));
   });
+  return opening;
 }
+export function closeDatabase() {
+  database?.close();
+  database = null;
+  opening = null;
+}
+window.addEventListener("pagehide", closeDatabase);
 export async function transact(names, mode, operation) {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {

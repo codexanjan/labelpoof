@@ -1316,6 +1316,67 @@ async function migrateOldSummaries() {
     /* Keep unrecognized legacy data untouched. */
   }
 }
+window.addEventListener("labelproof-storage-blocked", () => {
+  $("#app").innerHTML =
+    '<div class="boot-screen"><h1>Finishing your workspace update.</h1><p>Another LabelProof tab is using an older version. Your saved photos and reports are safe.</p><p>Refresh the other app tabs to release the update. Capture tabs are left open so you can save your work.</p><button class="primary" data-storage-action="refresh-tabs">Refresh other LabelProof tabs</button><p id="storage-progress" role="status">Waiting for the older tab to finish…</p></div>';
+});
+window.addEventListener("labelproof-storage-updated", () => {
+  $("#app").innerHTML =
+    '<div class="boot-screen"><h1>A workspace update is ready.</h1><p>This tab released its database connection so the update can finish. Saved records are retained.</p><button class="primary" data-storage-action="reload">Open updated app</button></div>';
+});
+document.addEventListener("click", async (e) => {
+  const button = e.target.closest("[data-storage-action]");
+  if (!button) return;
+  if (button.dataset.storageAction === "reload") {
+    location.reload();
+    return;
+  }
+  button.disabled = true;
+  try {
+    if (!("serviceWorker" in navigator))
+      throw new Error(
+        "Refresh the other LabelProof tabs manually, then return here. This page resumes automatically.",
+      );
+    const registration = await navigator.serviceWorker.register("/sw.js", {
+      updateViaCache: "none",
+    });
+    await registration.update();
+    const installing = registration.installing || registration.waiting;
+    if (installing && installing.state !== "activated")
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(
+          () =>
+            reject(
+              new Error(
+                "Refresh the other LabelProof dashboard tabs manually; this page resumes automatically.",
+              ),
+            ),
+          10000,
+        );
+        installing.addEventListener("statechange", () => {
+          if (installing.state === "activated") {
+            clearTimeout(timeout);
+            resolve();
+          }
+          if (installing.state === "redundant") {
+            clearTimeout(timeout);
+            reject(new Error("Update interrupted. Retry refreshing app tabs."));
+          }
+        });
+      });
+    const ready = await navigator.serviceWorker.ready;
+    ready.active.postMessage({ type: "LP_REFRESH_OLD_TABS" });
+    const progress = $("#storage-progress");
+    if (progress)
+      progress.textContent =
+        "Refreshing older dashboard tabs. This page will open automatically when the update finishes. If a capture tab is open, save it and refresh that tab.";
+  } catch (error) {
+    const progress = $("#storage-progress");
+    if (progress) progress.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
 async function boot() {
   $("#app").innerHTML =
     '<div class="boot-screen"><div class="spinner"></div><h2>Opening your evidence workspace…</h2></div>';
@@ -1342,7 +1403,7 @@ async function boot() {
     render();
   } catch (error) {
     $("#app").innerHTML =
-      `<div class="boot-screen"><h1>Browser storage is unavailable.</h1><p>${esc(error.message)}</p><p>Enable site storage or open LabelProof in a regular browser window.</p><button onclick="location.reload()" class="primary">Retry</button></div>`;
+      `<div class="boot-screen"><h1>Browser storage is unavailable.</h1><p>${esc(error.message)}</p><p>Enable site storage or open LabelProof in a regular browser window.</p><button data-storage-action="reload" class="primary">Retry</button></div>`;
   }
 }
 boot();
@@ -1845,5 +1906,7 @@ window.addEventListener("error", () => {
     }).catch(() => {});
 });
 
-if ("serviceWorker" in navigator && location.hostname !== "localhost")
-  navigator.serviceWorker.register("/sw.js").catch(() => {});
+if ("serviceWorker" in navigator && import.meta.env.PROD)
+  navigator.serviceWorker
+    .register("/sw.js", { updateViaCache: "none" })
+    .catch(() => {});

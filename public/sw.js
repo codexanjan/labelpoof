@@ -1,4 +1,4 @@
-const CACHE = "labelproof-shell-v3";
+const CACHE = "labelproof-shell-v3.0.1";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -55,5 +55,26 @@ self.addEventListener("fetch", (event) => {
         if (req.mode === "navigate") return caches.match("/");
         return Response.error();
       }),
+  );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "LP_REFRESH_OLD_TABS" || !event.source?.id) return;
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clients) =>
+        Promise.all(
+          clients
+            .filter(
+              (client) =>
+                client.id !== event.source.id &&
+                new URL(client.url).origin === self.location.origin &&
+                new URL(client.url).pathname.startsWith("/dashboard") &&
+                new URL(client.url).pathname !== "/dashboard/new",
+            )
+            .map((client) => client.navigate(client.url).catch(() => null)),
+        ),
+      ),
   );
 });

@@ -1,6 +1,6 @@
 {
   "name": "labelproof",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "description": "Evidence-backed packaged-food label review dashboard with browser OCR, image evidence and versioned reports.",
   "type": "module",
@@ -15,7 +15,8 @@
     "test:ocr": "node tests/ocr-browser.mjs",
     "test:ocr-errors": "node tests/ocr-errors.mjs",
     "test:deployment": "node tests/deployment.mjs",
-    "test:upgrades": "node tests/upgrades.mjs"
+    "test:upgrades": "node tests/upgrades.mjs",
+    "test:storage": "node tests/storage-upgrade.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",

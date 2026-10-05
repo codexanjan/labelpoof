@@ -37,3 +37,7 @@ This release adds operational features; it does not claim all production gates a
 ## Verification
 
 22 unit checks passed. Original button and browser suites passed. Upgrade suite verified new routes, comparison, version-specific preliminary decisions, capture reload recovery and real batch OCR. Live Vercel routes and original OCR/backup workflow are checked after deployment. The cloud security/schema integration remains unprovisioned and unverified, as explained above.
+
+## v3.0.1 storage recovery
+
+Fixed IndexedDB upgrades blocked by older tabs. An upgrade waits instead of reporting storage as unavailable. A recovery control refreshes older dashboard tabs while leaving capture pages alone; original data is preserved. Connections close on version change and page exit. The storage retry uses an event handler compatible with the content security policy. Browser regression checks cover a held version-1 connection, retained settings, automatic version-change release and retry when storage is genuinely denied.

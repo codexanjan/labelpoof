@@ -24,3 +24,7 @@ Tests use isolated Chrome desktop and 390px mobile workspaces, before deployment
 Run `npm test`, `npm run test:browser`, `npm run test:buttons`, `npm run test:ocr`, `npm run test:ocr-errors`, `npm run build`, `npm run test:deployment`.
 
 Limits: physical camera hardware and operating-system permission prompts are not exercised headlessly. External OCR models require network on first use. The OCR fixture benchmark is English; Hindi settings are available but are not benchmarked here. PDF text pages are rasterized, not selectable. Browser storage is implemented; cloud accounts, shared roles, PostgreSQL and official licence verification remain proposed systems. Official links are references, not legal validation. Testing does not certify compliance or guarantee every device.
+
+## Verified release results
+
+20 unit checks passed. Browser workflow, focused button audit, real OCR including restored conflict comparisons, and OCR error recovery passed. Production verification passed on 12 public routes, both metadata APIs, loaded evidence images and the full focused button workflow without page runtime errors. Physical camera hardware remains outside the automated test scope.

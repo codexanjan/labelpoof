@@ -1,4 +1,18 @@
 const DB_NAME = "labelproof-workspace-v2";
+let accountScope = "local";
+let generation = 0;
+export const workspaceScope = () => accountScope;
+export const workspaceGeneration = () => generation;
+export function selectAccount(userId) {
+  const next = userId || "local";
+  if (next !== "local" && !/^[0-9a-f-]{36}$/i.test(next))
+    throw new Error("Invalid account workspace.");
+  if (next === accountScope) return false;
+  closeDatabase();
+  accountScope = next;
+  generation++;
+  return true;
+}
 const STORE_NAMES = [
   "scans",
   "images",
@@ -15,13 +29,22 @@ export function openDatabase() {
   if (database) return Promise.resolve(database);
   if (opening) return opening;
   opening = new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 2);
+    const selected = generation;
+    const request = indexedDB.open(
+      accountScope === "local" ? DB_NAME : `${DB_NAME}-account-${accountScope}`,
+      2,
+    );
     request.onupgradeneeded = () => {
       for (const name of STORE_NAMES)
         if (!request.result.objectStoreNames.contains(name))
           request.result.createObjectStore(name, { keyPath: "id" });
     };
     request.onsuccess = () => {
+      if (selected !== generation) {
+        request.result.close();
+        reject(new Error("Account changed. Reopen the workspace."));
+        return;
+      }
       database = request.result;
       database.onversionchange = () => {
         database?.close();
@@ -54,7 +77,10 @@ export function closeDatabase() {
 }
 window.addEventListener("pagehide", closeDatabase);
 export async function transact(names, mode, operation) {
+  const selected = generation;
   const db = await openDatabase();
+  if (selected !== generation)
+    throw new Error("Account changed. Retry in the current workspace.");
   return new Promise((resolve, reject) => {
     const tx = db.transaction(names, mode);
     const stores = Object.fromEntries(
@@ -139,6 +165,7 @@ export async function clearWorkspace() {
   );
 }
 export async function loadWorkspace() {
+  const selected = generation;
   const [scans, images, assessments, events, settings, drafts, operations] =
     await Promise.all([
       list("scans"),
@@ -149,6 +176,8 @@ export async function loadWorkspace() {
       list("drafts"),
       list("operations"),
     ]);
+  if (selected !== generation)
+    throw new Error("Account changed while opening the workspace. Retry.");
   return {
     scans: scans.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
     images,

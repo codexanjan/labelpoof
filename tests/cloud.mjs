@@ -18,6 +18,7 @@ const clients = [1, 2, 3].map(() =>
   }),
 );
 const checks = [];
+const userIds = [];
 function pass(name) {
   checks.push(name);
   console.log("PASS " + name);
@@ -28,11 +29,12 @@ async function rpc(client, name, args) {
   return result.data;
 }
 for (const [index, client] of clients.entries()) {
-  const { error } = await client.auth.signInWithPassword({
+  const { error, data: login } = await client.auth.signInWithPassword({
     email: `lp-cloud-test-${index + 1}@example.test`,
     password: process.env.LP_TEST_PASSWORD,
   });
   if (error) throw error;
+  userIds.push(login.user.id);
 }
 const [admin, uploader, outsider] = clients;
 pass("Real confirmed-account password login");
@@ -45,13 +47,7 @@ await rpc(admin, "lp_set_member", {
   member: user.id,
   member_role: "uploader",
 });
-const payload = {
-  format: "labelproof-workspace",
-  schemaVersion: 2,
-  scans: [],
-  images: [],
-  assessments: [{ id: "test-report" }],
-};
+const payload = JSON.parse(readFileSync("supabase/demo-snapshot.json", "utf8"));
 assert.equal(
   await rpc(admin, "lp_save_snapshot", {
     organization: org,
@@ -103,11 +99,13 @@ assert(
 await uploader.auth.updateUser({ data: { role: "admin" } });
 assert(
   (
-    await uploader.rpc("lp_review", {
+    await uploader.rpc("lp_review_checked", {
       organization: org,
-      assessment: "test-report",
+      assessment: "demo-oats-v1",
       review_action: "approve",
       review_note: "Must be refused",
+      expected_version: 1,
+      assigned_to: null,
     })
   ).error,
 );
@@ -123,22 +121,26 @@ assert(
 pass(
   "Uploader cannot approve or promote themselves, including forged user metadata",
 );
-await rpc(uploader, "lp_review", {
+await rpc(uploader, "lp_review_checked", {
   organization: org,
-  assessment: "test-report",
+  assessment: "demo-oats-v1",
   review_action: "comment",
   review_note: "Uploader comment",
+  expected_version: 1,
+  assigned_to: null,
 });
 await rpc(admin, "lp_set_member", {
   organization: org,
   member: user.id,
   member_role: "reviewer",
 });
-await rpc(uploader, "lp_review", {
+await rpc(uploader, "lp_review_checked", {
   organization: org,
-  assessment: "test-report",
+  assessment: "demo-oats-v1",
   review_action: "approve",
   review_note: "Reviewer test approval",
+  expected_version: 1,
+  assigned_to: null,
 });
 pass("Reviewer permission and immutable server audit events");
 const boundReviews = await uploader
@@ -233,7 +235,7 @@ const browser = await chromium.launch({ channel: "chrome", headless: true });
 try {
   async function signedPage(index) {
     const context = await browser.newContext();
-    if (origin.startsWith("http://localhost"))
+    if (/^http:\/\/(localhost|127\.0\.0\.1)/.test(origin))
       await context.route("**/api/config", (route) =>
         route.fulfill({
           json: { url, publishableKey: key, cloudConfigured: true },
@@ -249,6 +251,10 @@ try {
     await page
       .getByRole("heading", { name: "Signed in", exact: true })
       .waitFor();
+    await page.evaluate(
+      (id) => localStorage.setItem("lp-test-user", id),
+      userIds[index - 1],
+    );
     return { context, page };
   }
   const a = await signedPage(1);
@@ -266,7 +272,10 @@ try {
   await a.page.getByText("Team role saved.", { exact: true }).waitFor();
   await a.page.evaluate(async () => {
     const db = await new Promise((resolve) => {
-      const r = indexedDB.open("labelproof-workspace-v2");
+      const r = indexedDB.open(
+        "labelproof-workspace-v2-account-" +
+          localStorage.getItem("lp-test-user"),
+      );
       r.onsuccess = () => resolve(r.result);
     });
     const photo = await new Promise((resolve) => {
@@ -325,7 +334,10 @@ try {
   async function countScans() {
     return b.page.evaluate(async () => {
       const db = await new Promise((resolve, reject) => {
-        const r = indexedDB.open("labelproof-workspace-v2");
+        const r = indexedDB.open(
+          "labelproof-workspace-v2-account-" +
+            localStorage.getItem("lp-test-user"),
+        );
         r.onsuccess = () => resolve(r.result);
         r.onerror = () => reject(r.error);
       });
@@ -341,7 +353,10 @@ try {
   assert(
     await b.page.evaluate(async () => {
       const db = await new Promise((resolve) => {
-        const r = indexedDB.open("labelproof-workspace-v2");
+        const r = indexedDB.open(
+          "labelproof-workspace-v2-account-" +
+            localStorage.getItem("lp-test-user"),
+        );
         r.onsuccess = () => resolve(r.result);
       });
       const found = await new Promise((resolve) => {

@@ -2,6 +2,16 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "functions": {
+    "api/worker.js": {
+      "maxDuration": 240,
+      "includeFiles": "node_modules/tesseract.js*/**"
+    },
+    "api/jobs.js": {
+      "maxDuration": 240,
+      "includeFiles": "node_modules/tesseract.js*/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/dashboard/:path*",

@@ -33,7 +33,7 @@ import {
 import { captureView } from "./views/capture.js";
 import { reportView } from "./views/report.js";
 import { operationsView } from "./views/operations.js";
-import { documentationView } from "./views/documentation.js";
+import { cloudJobRows } from "./views/cloud-controls.js";
 import { initCloud, cloudStatus, cloudClient, authAction } from "./cloud.js";
 import { qualityHints } from "./quality.js";
 import { validateDeclarations } from "./validation.js";
@@ -70,7 +70,6 @@ const nav = [
   ["approvals", "Review workflow", "check", "/approvals"],
   ["compare", "Compare reports", "files", "/compare"],
   ["operations", "Release readiness", "activity", "/operations"],
-  ["documents", "Project documents", "book-open", "/documents"],
 ];
 const id = () => crypto.randomUUID();
 const imageUrl = (image) => {
@@ -101,6 +100,10 @@ function route() {
   if (path === "/dashboard" || path === "/dashboard/overview")
     return { view: "overview" };
   if (path === "/dashboard/new") return { view: "capture" };
+  if (path === "/dashboard/documents") {
+    history.replaceState({}, "", "/dashboard/processing");
+    return { view: "processing" };
+  }
   const match = path.match(/^\/dashboard\/scans\/([^/]+)$/);
   if (match)
     return {
@@ -153,7 +156,7 @@ function render() {
           ? "New scan"
           : nav.find((n) => n[0] === r.view)?.[1] || "Page not found";
     $("#app").innerHTML =
-      `<a class="skip-link" href="#content">Skip to content</a><button class="menu-backdrop" data-action="menu" aria-label="Close navigation"></button><aside class="sidebar workspace-sidebar"><button class="icon-button menu-close" data-action="menu" aria-label="Close navigation">${icon("x")}</button><a class="brand" href="/">${icon("scan-line")}<span>Label<span class="brand-light">Proof</span><small>EVIDENCE, NOT ASSUMPTIONS</small></span></a><div class="workspace"><span class="avatar">LP</span><div>${esc(data.settings.workspaceName)}<small>Local browser workspace</small></div></div><div class="nav-label">WORKSPACE</div><nav>${nav.map(([key, title, i, path]) => `<a href="/dashboard${path}" class="${r.view === key || (r.view === "report" && key === "scans") ? "active" : ""}">${icon(i)}<span>${title}</span>${key === "review" ? `<span class="nav-count">${queueItems(data).length}</span>` : ""}</a>`).join("")}</nav><div class="sidebar-storage">${icon("hard-drive")}<div><b>Evidence stays with you.</b><small>Photos and reports saved on this device.</small></div></div><a class="side-bottom" href="/dashboard/settings"><span class="avatar small">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</span><div>${esc(data.settings.reviewerName)}<small>SIH26034 · Prototype</small></div><span class="live-dot"></span></a></aside><div class="main"><header><div class="header-leading"><button class="icon-button menu-toggle" data-action="menu" aria-label="Toggle navigation">${icon("menu")}</button><div class="breadcrumb">Workspace <span>/</span> ${viewName}</div></div><form id="global-search" class="global-search">${icon("search")}<input aria-label="Search products" placeholder="Search products…" value="${esc(state.search)}"><button type="submit" aria-label="Search">${icon("arrow-right")}</button></form><div class="header-right"><span class="prototype">${icon("flask-conical")} Prototype</span><button class="icon-button notification-button" data-action="notifications" aria-label="View recent activity">${icon("bell")}<span></span></button><a class="avatar small" href="/dashboard/settings" aria-label="Workspace settings">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</a></div></header><main id="content" tabindex="-1">${content(r)}</main><footer><span>LabelProof · Evidence, not assumptions.</span><span>${icon("lock-keyhole")} Browser storage · Preliminary label review</span></footer></div>`;
+      `<a class="skip-link" href="#content">Skip to content</a><button class="menu-backdrop" data-action="menu" aria-label="Close navigation"></button><aside class="sidebar workspace-sidebar"><button class="icon-button menu-close" data-action="menu" aria-label="Close navigation">${icon("x")}</button><a class="brand" href="/">${icon("scan-line")}<span>Label<span class="brand-light">Proof</span><small>EVIDENCE, NOT ASSUMPTIONS</small></span></a><div class="workspace"><span class="avatar">LP</span><div>${esc(data.settings.workspaceName)}<small>${cloudStatus.user ? "Separate account workspace" : "Local browser workspace"}</small></div></div><div class="nav-label">WORKSPACE</div><nav>${nav.map(([key, title, i, path]) => `<a href="/dashboard${path}" class="${r.view === key || (r.view === "report" && key === "scans") ? "active" : ""}">${icon(i)}<span>${title}</span>${key === "review" ? `<span class="nav-count">${queueItems(data).length}</span>` : ""}</a>`).join("")}</nav><div class="sidebar-storage">${icon("hard-drive")}<div><b>Evidence stays with you.</b><small>Photos and reports saved on this device.</small></div></div><a class="side-bottom" href="/dashboard/settings"><span class="avatar small">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</span><div>${esc(data.settings.reviewerName)}<small>SIH26034 · Prototype</small></div><span class="live-dot"></span></a></aside><div class="main"><header><div class="header-leading"><button class="icon-button menu-toggle" data-action="menu" aria-label="Toggle navigation">${icon("menu")}</button><div class="breadcrumb">Workspace <span>/</span> ${viewName}</div></div><form id="global-search" class="global-search">${icon("search")}<input aria-label="Search products" placeholder="Search products…" value="${esc(state.search)}"><button type="submit" aria-label="Search">${icon("arrow-right")}</button></form><div class="header-right"><span class="prototype">${icon("flask-conical")} Prototype</span><button class="icon-button notification-button" data-action="notifications" aria-label="View recent activity">${icon("bell")}<span></span></button><a class="avatar small" href="/dashboard/settings" aria-label="Workspace settings">${esc(data.settings.reviewerName.slice(0, 1).toUpperCase())}</a></div></header><main id="content" tabindex="-1">${content(r)}</main><footer><span>LabelProof · Evidence, not assumptions.</span><span>${icon("lock-keyhole")} Browser storage · Preliminary label review</span></footer></div>`;
   }
   if (!$("#dialog-host"))
     document.body.insertAdjacentHTML(
@@ -164,7 +167,6 @@ function render() {
   bindForms();
 }
 function content(r) {
-  if (r.view === "documents") return documentationView();
   if (
     [
       "account",
@@ -222,6 +224,24 @@ function draftMetadata() {
 }
 async function refresh() {
   data = await storage.loadWorkspace();
+  data.cloudJobs = state.cloudJobs || [];
+}
+async function applyLocalRetention() {
+  const settings = await storage.getSettings();
+  if (!settings.retentionAuto) return;
+  const cutoff = Date.now() - settings.retentionDays * 86400000;
+  const expired = (await storage.list("scans")).filter(
+    (s) => !s.demo && Date.parse(s.updatedAt) < cutoff,
+  );
+  for (const scan of expired) await storage.deleteScan(scan.id);
+  if (expired.length)
+    await storage.put("events", {
+      id: id(),
+      type: "retention",
+      message: `Automatically removed ${expired.length} expired local products under your retention setting.`,
+      actor: "Retention policy",
+      at: new Date().toISOString(),
+    });
 }
 async function event(type, message, scanId = null) {
   await storage.put("events", {
@@ -315,7 +335,10 @@ async function rescan(scanId, fieldKey = state.field) {
   go("/dashboard/new");
 }
 async function commitAssessment(...args) {
+  const selected = storage.workspaceGeneration();
   const work = async () => {
+    if (selected !== storage.workspaceGeneration())
+      throw new Error("Account changed. Reopen this product before saving.");
     const scan = args[0];
     if (scan.id) {
       const persisted = await storage.get("scans", scan.id);
@@ -325,6 +348,8 @@ async function commitAssessment(...args) {
         );
     }
     await refresh();
+    if (selected !== storage.workspaceGeneration())
+      throw new Error("Account changed. Reopen this product before saving.");
     return commitAssessmentInner(...args);
   };
   return navigator.locks
@@ -412,6 +437,7 @@ async function analyze() {
   }
   if (!state.draft.images.length) return toast("Add a photo first.");
   state.busy = true;
+  const selected = storage.workspaceGeneration();
   state.ocrController = new AbortController();
   showModal(
     "Following the evidence.",
@@ -438,6 +464,7 @@ async function analyze() {
       },
       state.ocrController.signal,
     );
+    if (selected !== storage.workspaceGeneration()) return;
     const findings = assess(state.draft.images);
     const result = await commitAssessment(
       state.draft.scan,
@@ -875,6 +902,15 @@ async function importBackup(file, cloudImport = null) {
           initialized: true,
         }
       : data.settings;
+  if (cloudImport) {
+    cloudImport.assessmentOriginals ||= {};
+    for (const [index, assessment] of assessments.entries()) {
+      cloudImport.assessmentOriginals[input.assessments[index].id] = {
+        original: input.assessments[index],
+        local: JSON.stringify(assessment),
+      };
+    }
+  }
   await storage.transact(
     [
       "scans",
@@ -1409,11 +1445,29 @@ async function boot() {
   $("#app").innerHTML =
     '<div class="boot-screen"><div class="spinner"></div><h2>Opening your evidence workspace…</h2></div>';
   try {
+    let rememberedAccount = null;
+    try {
+      rememberedAccount = localStorage.getItem("labelproof-active-account");
+    } catch {}
+    // Never flash the anonymous workspace while recovering a signed-in account.
+    if (rememberedAccount) {
+      await initCloud();
+      storage.selectAccount(cloudStatus.user?.id || null);
+      try {
+        if (cloudStatus.user)
+          localStorage.setItem(
+            "labelproof-active-account",
+            cloudStatus.user.id,
+          );
+        else localStorage.removeItem("labelproof-active-account");
+      } catch {}
+    }
     const settings = await storage.getSettings();
     if (!settings.initialized) {
       await seedDemos();
       await storage.put("settings", { ...settings, initialized: true });
     }
+    await applyLocalRetention();
     await refresh();
     const capture = await storage.get("captureDrafts", "active");
     if (capture?.draft) state.draft = capture.draft;
@@ -1429,14 +1483,21 @@ async function boot() {
     await migrateOldSummaries();
     render();
     // Open local evidence independently of cloud configuration or recovery.
-    void initCloud().then(() => {
-      if (
-        data &&
-        ["account", "team", "operations", "approvals"].includes(route().view) &&
-        !document.activeElement?.matches("input, textarea, select") &&
-        !$("dialog[open]")
-      ) render();
-    });
+    void (rememberedAccount ? Promise.resolve() : initCloud()).then(
+      async () => {
+        await synchronizeAccount();
+        activateCloudControls();
+        if (
+          data &&
+          ["account", "team", "operations", "approvals"].includes(
+            route().view,
+          ) &&
+          !document.activeElement?.matches("input, textarea, select") &&
+          !$("dialog[open]")
+        )
+          render();
+      },
+    );
   } catch (error) {
     $("#app").innerHTML =
       `<div class="boot-screen"><h1>Browser storage is unavailable.</h1><p>${esc(error.message)}</p><p>Enable site storage or open LabelProof in a regular browser window.</p><button data-storage-action="reload" class="primary">Retry</button></div>`;
@@ -1465,8 +1526,57 @@ window.addEventListener("error", (e) =>
     })
     .catch(() => {}),
 );
+let accountTransition = Promise.resolve();
+function activateCloudControls() {
+  if (!cloudStatus.configured) return;
+  for (const button of document.querySelectorAll(
+    '[data-extra][title="Cloud connection is not available yet"]',
+  )) {
+    button.disabled = false;
+    button.removeAttribute("title");
+  }
+}
+function synchronizeAccount() {
+  accountTransition = accountTransition
+    .then(async () => {
+      if (!data) return;
+      const next = cloudStatus.user?.id || "local";
+      if (storage.workspaceScope() === next) return;
+      batchStop = true;
+      state.ocrController?.abort();
+      state.busy = false;
+      state.draft = null;
+      state.cloudJobs = [];
+      state.search = "";
+      closeModal();
+      for (const url of urls.values()) URL.revokeObjectURL(url);
+      urls.clear();
+      $("#app").innerHTML =
+        '<div class="boot-screen"><h2>Opening your separate account workspace…</h2></div>';
+      storage.selectAccount(next);
+      try {
+        if (next === "local")
+          localStorage.removeItem("labelproof-active-account");
+        else localStorage.setItem("labelproof-active-account", next);
+      } catch {}
+      const settings = await storage.getSettings();
+      if (!settings.initialized) {
+        await seedDemos();
+        await storage.put("settings", { ...settings, initialized: true });
+      }
+      await applyLocalRetention();
+      await refresh();
+      const capture = await storage.get("captureDrafts", "active");
+      if (capture?.draft) state.draft = capture.draft;
+      render();
+    })
+    .catch((error) => {
+      toast(error.message);
+    });
+  return accountTransition;
+}
 window.addEventListener("labelproof-auth", () => {
-  if (data && ["account", "team", "operations"].includes(route().view)) render();
+  void synchronizeAccount().then(activateCloudControls);
 });
 let batchStop = false,
   batchRunning = false;
@@ -1489,6 +1599,7 @@ async function processJob(job) {
     : work();
 }
 async function processJobInner(job) {
+  const selectedScope = storage.workspaceGeneration();
   const saved = data.scans.find((scan) => scan.processingJobId === job.id);
   if (saved) {
     await storage.put("operations", {
@@ -1512,6 +1623,7 @@ async function processJobInner(job) {
       const el = $("#job-progress");
       if (el) el.textContent = progress.stage;
     });
+    if (selectedScope !== storage.workspaceGeneration()) return;
     const result = await commitAssessment(
       {
         name: job.name,
@@ -1532,6 +1644,7 @@ async function processJobInner(job) {
       image: null,
     });
   } catch (error) {
+    if (selectedScope !== storage.workspaceGeneration()) return;
     await storage.put("operations", {
       ...next,
       status: "failed",
@@ -1571,6 +1684,7 @@ function remoteId(baseline, store, localId) {
   );
 }
 async function cloudUpload(orgId) {
+  const generation = storage.workspaceGeneration();
   const c = cloudClient();
   const baseline = cloudBaseline(orgId);
   const { data: remote, error } = await c
@@ -1640,16 +1754,33 @@ async function cloudUpload(orgId) {
               Object.entries(value).map(([key, item]) => [key, remap(item)]),
             )
           : value;
+  const document = remap(payload);
+  for (const [index, assessment] of data.assessments.entries()) {
+    const key = remoteId(baseline, "assessments", assessment.id);
+    const preserved = baseline.assessmentOriginals?.[key];
+    if (preserved) {
+      if (JSON.stringify(assessment) !== preserved.local)
+        throw new Error(
+          "An imported assessment changed. Create a new report version before publishing.",
+        );
+      document.assessments[index] = preserved.original;
+    }
+  }
   baseline.version = await cloudRPC("lp_save_snapshot", {
     organization: orgId,
     expected_version: cloudVersion,
-    payload: remap(payload),
+    payload: document,
   });
+  if (generation !== storage.workspaceGeneration())
+    throw new Error(
+      "Account changed. Cloud saved; reopen your account to sync.",
+    );
   await storage.put("operations", baseline);
   await refresh();
   toast("Private cloud snapshot saved. Version " + baseline.version);
 }
 async function cloudPull(orgId) {
+  const generation = storage.workspaceGeneration();
   const c = cloudClient();
   const baseline = cloudBaseline(orgId);
   const { data: row, error } = await c
@@ -1676,6 +1807,10 @@ async function cloudPull(orgId) {
     }
   }
   baseline.version = row.version;
+  if (generation !== storage.workspaceGeneration())
+    throw new Error(
+      "Account changed. Download again in the current workspace.",
+    );
   await importBackup(
     new File([JSON.stringify(payload)], "cloud.json", {
       type: "application/json",
@@ -1686,6 +1821,98 @@ async function cloudPull(orgId) {
     "Cloud workspace merged. Existing cloud records updated without duplicates.",
   );
 }
+async function loadCloudJobs(orgId) {
+  cloudBaseline(orgId);
+  const generation = storage.workspaceGeneration();
+  const { data: jobs, error } = await cloudClient()
+    .from("lp_jobs")
+    .select("id,request,status,attempts,error,result_scan,updated_at")
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  if (generation !== storage.workspaceGeneration()) return;
+  state.cloudJobs = jobs;
+  data.cloudJobs = jobs;
+  if ($("#cloud-jobs-list"))
+    $("#cloud-jobs-list").innerHTML = cloudJobRows(jobs);
+}
+async function queueCloudJob() {
+  const orgId = $("#cloud-job-org").value.trim(),
+    name = $("#cloud-job-name").value.trim();
+  cloudBaseline(orgId);
+  if (!name) throw new Error("Add a product name.");
+  const files = [...$("#cloud-job-files").files];
+  if (files.length < 1 || files.length > 6)
+    throw new Error("Select 1–6 photos of one product.");
+  const generation = storage.workspaceGeneration(),
+    surface = $("#cloud-job-surface").value;
+  const jobId = id(),
+    images = [];
+  const progress = $("#cloud-job-progress");
+  for (const [index, file] of files.entries()) {
+    if (
+      !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+      file.size > 12582912
+    )
+      throw new Error("Use JPG, PNG or WebP photos, at most 12 MiB each.");
+    progress.textContent = `Uploading private photo ${index + 1} of ${files.length}…`;
+    const sha256 = [
+      ...new Uint8Array(
+        await crypto.subtle.digest("SHA-256", await file.arrayBuffer()),
+      ),
+    ]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const storagePath = `${orgId}/jobs/${jobId}/${index}`;
+    const { error } = await cloudClient()
+      .storage.from("labelproof-evidence")
+      .upload(storagePath, file, { contentType: file.type, upsert: false });
+    if (error) throw error;
+    images.push({ storagePath, sha256, surface });
+  }
+  await cloudRPC("lp_enqueue_job", {
+    organization: orgId,
+    job_id: jobId,
+    job_request: { name, images, language: data.settings.language || "eng" },
+  });
+  if (generation !== storage.workspaceGeneration()) return;
+  await storage.put("settings", { ...data.settings, cloudOrganization: orgId });
+  const { data: session } = await cloudClient().auth.getSession();
+  const response = await fetch("/api/jobs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + session.session.access_token,
+    },
+    body: JSON.stringify({ organization: orgId }),
+    signal: AbortSignal.timeout(15000),
+  }).catch(() => null);
+  toast(
+    response?.ok
+      ? "Cloud job saved. Processing continues after closing this page."
+      : "Cloud job safely queued. The server scheduler will start it shortly.",
+  );
+  await refresh();
+  await loadCloudJobs(orgId);
+}
+setInterval(() => {
+  if (
+    route().view === "processing" &&
+    cloudStatus.user &&
+    data?.settings.cloudOrganization &&
+    !document.activeElement?.matches("input,textarea,select") &&
+    !$("dialog[open]") &&
+    !state.cloudPolling
+  ) {
+    state.cloudPolling = true;
+    loadCloudJobs(data.settings.cloudOrganization)
+      .catch(() => {})
+      .finally(() => {
+        state.cloudPolling = false;
+      });
+  }
+}, 10000);
 document.addEventListener("click", async (e) => {
   const el = e.target.closest("[data-extra]");
   if (!el || el.disabled) return;
@@ -1695,6 +1922,11 @@ document.addEventListener("click", async (e) => {
     if (action === "reload") location.reload();
     if (action === "choose-org") {
       $("#org-id").value = el.dataset.organization;
+      await storage.put("settings", {
+        ...data.settings,
+        cloudOrganization: el.dataset.organization,
+      });
+      await refresh();
       toast("Organization selected.");
     }
     if (
@@ -1707,6 +1939,7 @@ document.addEventListener("click", async (e) => {
       if (["signup", "password"].includes(action) && password.length < 12)
         throw new Error("Use a password of at least 12 characters.");
       await authAction(action, email, password);
+      await synchronizeAccount();
       toast(
         action === "signup"
           ? "Check your email to confirm your account."
@@ -1765,9 +1998,15 @@ document.addEventListener("click", async (e) => {
       const days = Number($("#retention-days").value);
       if (!Number.isInteger(days) || days < 1 || days > 3650)
         throw new Error("Choose 1–3650 days.");
-      await storage.put("settings", { ...data.settings, retentionDays: days });
+      await storage.put("settings", {
+        ...data.settings,
+        retentionDays: days,
+        retentionAuto: $("#retention-auto").checked,
+      });
       await refresh();
-      toast("Retention reminder saved.");
+      toast(
+        "Retention setting saved. Automatic deletion runs when this workspace opens.",
+      );
     }
     if (action === "create-org") {
       const name = $("#org-name").value.trim();
@@ -1809,7 +2048,7 @@ document.addEventListener("click", async (e) => {
       const { data: reviews, error } = await cloudClient()
         .from("lp_review_events")
         .select(
-          "assessment_id,action,note,actor,at,snapshot_version,assessment_sha256",
+          "assessment_id,action,note,actor,at,snapshot_version,assessment_sha256,assigned_user",
         )
         .eq("org_id", $("#workflow-org").value.trim())
         .order("at", { ascending: false })
@@ -1819,12 +2058,85 @@ document.addEventListener("click", async (e) => {
         reviews
           .map(
             (r) =>
-              `<p><b>${esc(r.action)}</b> · ${esc(r.note)}<br><small>By ${esc(r.actor)} · snapshot ${esc(r.snapshot_version)} · ${esc(r.at)}<br>Assessment: ${esc(r.assessment_id)}<br>SHA-256: ${esc(r.assessment_sha256)}</small></p>`,
+              `<p><b>${esc(r.action)}</b> · ${esc(r.note)}<br><small>By ${esc(r.actor)} · snapshot ${esc(r.snapshot_version)} · ${esc(r.at)}${r.assigned_user ? " · Assigned: " + esc(r.assigned_user) : ""}<br>Assessment: ${esc(r.assessment_id)}<br>SHA-256: ${esc(r.assessment_sha256)}</small></p>`,
           )
           .join("") || "No server review records yet.";
     }
     if (action === "sync-cloud") await cloudUpload($("#org-id").value.trim());
     if (action === "pull-cloud") await cloudPull($("#org-id").value.trim());
+    if (action === "queue-cloud-job") await queueCloudJob();
+    if (action === "load-cloud-jobs")
+      await loadCloudJobs($("#cloud-job-org").value.trim());
+    if (action === "download-job-reports")
+      await cloudPull($("#cloud-job-org").value.trim());
+    if (action === "list-restore-points") {
+      const orgId = $("#org-id").value.trim();
+      cloudBaseline(orgId);
+      const { data: points, error } = await cloudClient()
+        .from("lp_snapshot_history")
+        .select("version,created_at")
+        .eq("org_id", orgId)
+        .order("version", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      $("#restore-points").innerHTML =
+        points
+          .map((p) => `<p>Version ${p.version} · ${date(p.created_at)}</p>`)
+          .join("") ||
+        "No restore points yet. Publish another version to create one.";
+    }
+    if (action === "preview-restore") {
+      const orgId = $("#org-id").value.trim(),
+        version = Number($("#restore-version").value);
+      const baseline = cloudBaseline(orgId);
+      const { data: point, error } = await cloudClient()
+        .from("lp_snapshot_history")
+        .select("payload,version")
+        .eq("org_id", orgId)
+        .eq("version", version)
+        .single();
+      if (error) throw error;
+      state.restorePreview = {
+        orgId,
+        version,
+        expected: baseline.version,
+        generation: storage.workspaceGeneration(),
+      };
+      $("#restore-preview").innerHTML =
+        `<p>Restore version ${version}: ${point.payload.scans.length} products, ${point.payload.images.length} photos, ${point.payload.assessments.length} reports. Current sync baseline: ${baseline.version}. Download the current cloud workspace first if this is outdated.</p><ul>${point.payload.scans.map((s) => `<li>${esc(s.name)}</li>`).join("")}</ul><button class="danger-button" data-extra="confirm-restore">Restore this cloud version</button>`;
+    }
+    if (action === "confirm-restore") {
+      const p = state.restorePreview;
+      if (!p || p.generation !== storage.workspaceGeneration())
+        throw new Error("Preview the restore point again.");
+      const version = await cloudRPC("lp_restore_snapshot", {
+        organization: p.orgId,
+        restore_version: p.version,
+        expected_version: p.expected,
+      });
+      state.restorePreview = null;
+      $("#restore-preview").textContent =
+        `Restored as cloud version ${version}. Download cloud workspace to load the restored reports.`;
+      toast("Cloud restore completed and recorded in the server audit.");
+    }
+    if (action === "cloud-audit") {
+      const orgId = $("#org-id").value.trim();
+      cloudBaseline(orgId);
+      const { data: events, error } = await cloudClient()
+        .from("lp_audit")
+        .select("action,actor,at,details")
+        .eq("org_id", orgId)
+        .order("at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      $("#cloud-audit").innerHTML =
+        events
+          .map(
+            (e) =>
+              `<p><b>${esc(e.action)}</b> · ${date(e.at)}<br><small>Actor: ${esc(e.actor)} · ${esc(JSON.stringify(e.details))}</small></p>`,
+          )
+          .join("") || "No audit events.";
+    }
     if (
       ["assign", "comment", "rescan-request", "approve", "reject"].includes(
         action,
@@ -1844,7 +2156,8 @@ document.addEventListener("click", async (e) => {
           approve: "approve",
           reject: "reject",
         }[action];
-        await cloudRPC("lp_review", {
+        const baseline = cloudBaseline(organization);
+        await cloudRPC("lp_review_checked", {
           organization,
           assessment: remoteId(
             cloudBaseline(organization),
@@ -1853,6 +2166,11 @@ document.addEventListener("click", async (e) => {
           ),
           review_action: reviewAction,
           review_note: note,
+          expected_version: baseline.version,
+          assigned_to:
+            reviewAction === "assign"
+              ? $("#assigned-reviewer").value.trim() || null
+              : null,
         });
       }
       await storage.put("operations", {

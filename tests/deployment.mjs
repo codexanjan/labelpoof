@@ -40,7 +40,7 @@ try {
   const health = await page.request.get(origin + "/api/health");
   assert.equal(health.status(), 200);
   const healthBody = await health.json();
-  assert.equal(healthBody.version, "3.3.0");
+  assert.equal(healthBody.version, "3.4.0");
   assert.equal(healthBody.cloudConfigured, true);
   const config = await (await page.request.get(origin + "/api/config")).json();
   assert.equal(config.cloudConfigured, true);

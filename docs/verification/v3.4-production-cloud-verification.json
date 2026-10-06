@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-06T03:21:17.524Z",
+  "org": "a040b26e-f8dd-458e-9c21-ef73a308ec89",
+  "checks": [
+    "Server rejects duplicate IDs, foreign references, URLs, unreadable absence, invalid regions and immutable report edits atomically",
+    "Approvals enforce reviewer role, current snapshot and valid team assignment",
+    "Cloud restore works, rejects stale versions and keeps history/jobs/worker functions private",
+    "Live worker rejects forged credentials and outsider dispatch",
+    "Live server OCR completes after closing the browser, extracts 12 synthetic declarations and saves one hash-linked report",
+    "Completed cloud report downloads with original private image and working evidence viewer",
+    "Scheduler-only OCR job queued for independent recovery verification"
+  ]
+}

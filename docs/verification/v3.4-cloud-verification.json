@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-06T03:09:27.045Z",
+  "checks": [
+    "Real confirmed-account password login",
+    "Organization creation, membership and shared snapshot read",
+    "Cross-organization report and membership isolation",
+    "Uploader cannot approve or promote themselves, including forged user metadata",
+    "Reviewer permission and immutable server audit events",
+    "Stale snapshot and invalid payload rejected",
+    "Private photos restore byte-for-byte; outsiders and anonymous users denied",
+    "Logout revokes subsequent cloud actions",
+    "Browser login, organization creation, adding member and upload buttons",
+    "Separate browser/account cloud restoration, repeat download without duplicates and reload-safe upload",
+    "Stale browser prevented from overwriting another reviewer snapshot",
+    "Browser sign-out button"
+  ]
+}

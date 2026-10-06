@@ -1,6 +1,6 @@
 # LabelProof — Evidence, not assumptions
 
-**SIH26034 concept · Packaged-food label review workspace · Version 3.3**
+**SIH26034 concept · Packaged-food label review workspace · Version 3.4**
 
 Scan a packaged product, follow its image evidence, and understand what was observed, what is unreadable, and what still needs a photograph. LabelProof turns label review into a transparent, traceable workflow.
 
@@ -8,20 +8,25 @@ Scan a packaged product, follow its image evidence, and understand what was obse
 
 ![LabelProof dashboard with product images, observation counts, review queue and activity](docs/images/dashboard.png)
 
-## Complete project documents and master prompt
+## Implemented app upgrades in v3.4
 
-[Open Project documents](https://labelproof-prototype.vercel.app/dashboard/documents) to download five complete specifications as PDFs and editable Markdown, the full master and MVP prompt, a verification report and the all-documents ZIP.
+The specifications now drive working application features. The document-download screen has been removed from the dashboard; its old URL opens Processing & batches.
 
-- [PRD](docs/specifications/01-PRD.md): scope, users, journeys, priorities and release acceptance.
-- [SRS](docs/specifications/02-SRS.md): 29 functional requirements, data invariants, interfaces and nonfunctional targets.
-- [Development architecture](docs/specifications/03-Development-Architecture.md): current frontend/backend/cloud model, target models, APIs, jobs, deployment and migration sequence.
-- [UI and UX](docs/specifications/04-UI-UX.md): screen behavior, uncertainty, responsive flows and accessibility.
-- [Testing](docs/specifications/05-Testing.md): executable suites, requirement traceability, 12 scenario groups and production gates.
-- [Full master and MVP prompt](docs/specifications/MASTER-PROMPT.md) and [release verification](docs/specifications/VERIFICATION.md).
+- **Durable cloud OCR:** private photo uploads, database-backed jobs, server Tesseract processing, one-minute recovery scheduler, five-minute leases, at most three attempts and idempotent report creation. Close the browser after queuing a job; download the completed report to review its evidence. Server image decoding validates file type, dimensions and SHA-256; EXIF rotation is handled without changing the original upload.
+- **Separate account caches:** login, logout and reload select the correct browser database. Photo drafts and settings do not mix with the anonymous workspace or another account. This is application separation, not encryption against someone who controls the browser profile.
+- **Strict cloud publication:** the server validates record IDs, image/report references, private paths, evidence regions, readable coverage for absence findings and immutable assessment versions. Imported reports retain their original server representation during another publication.
+- **Team review controls:** approvals check the server role and expected cloud version; assignments must name a current reviewer/admin. Decisions retain the assessment hash and snapshot version.
+- **Cloud restore points:** each publication preserves its previous snapshot, up to ten recent versions. Administrators can preview and restore a point; restoration creates a new version and an audit entry.
+- **Opt-in local retention:** expire old local products, images, reports and associated events on workspace opening, with a recorded deletion event. Automatic deletion is off by default; cloud copies are separate.
+- **Server audit and processing status:** inspect team audit entries and cloud job attempts/errors from the dashboard. Cloud job polling updates only the history panel and preserves in-progress form entry.
 
-Version 3.3 adds the documentation page, a reproducible full-test runner and faster workspace startup that renders local evidence independently of cloud setup. Button/batch fixtures now live in the repository; scratch downloads stay in ignored `work/`. Run `npm run test:full` after `npm ci`; it starts and stops its own isolated Vite server. Chrome and first-use OCR network access are required. Use `npm run test:deployment` for live API/routes. Set `TEST_URL` to `https://labelproof-prototype.vercel.app` and run `npm run test:demo` for the real read-only cloud demo.
+![Cloud processing with completed and recovered server jobs](docs/images/cloud-processing.png)
 
-These specifications supersede the historical v2 PRD, PSD, TRD and original proposed database documentation. Implemented features and target production features are explicitly distinguished. Public email, reviewed legal packs, remote OCR, enforced retention/deletion, account-isolated local caches, backup restoration drills and external alerts remain release gates.
+[Implementation and verification](docs/V3_4_IMPLEMENTATION.md) · [Cloud processing](https://labelproof-prototype.vercel.app/dashboard/processing) · [Team and restore controls](https://labelproof-prototype.vercel.app/dashboard/team)
+
+Run `npm run test:full` after `npm ci`; it starts and stops its own isolated test server. Chrome and first-use OCR network access are required. `npm run test:deployment` checks the live release. Normal-account cloud tests require operator-provisioned disposable example.test accounts, never customer credentials. Public demo credentials are below.
+
+The five reference specifications and master/MVP prompt remain in [docs/specifications](docs/specifications/MASTER-PROMPT.md). They describe the v3.3 baseline and target requirements; use the v3.4 implementation report for current status.
 
 ## Demo login
 
@@ -34,13 +39,13 @@ These credentials are intentionally public. The real cloud account can read only
 
 To restore the samples from cloud: Team & cloud → Load my organizations → Select LabelProof Demo → Download cloud workspace.
 
-Email provider chosen: **Resend**. The owner currently has no sender domain, so public signup and password-recovery email delivery remain pending domain verification, provider credentials and Supabase dashboard settings. Email confirmation stays enabled. Legal validation and distributed remote OCR remain separate production gates.
+Email provider chosen: **Resend**. The owner currently has no sender domain, so public signup and password-recovery email delivery remain pending domain verification, provider credentials and Supabase dashboard settings. Email confirmation stays enabled. Reviewed operative legal packs, registry verification and real-world OCR benchmarking remain production gates. Cloud OCR is implemented in v3.4.
 
 ## v3 additions
 
 [Complete release and readiness report](docs/V3_RELEASE.md).
 
-Added persistent capture drafts, resumable browser batches, barcode reading, quality hints, reviewer assignments/comments/preliminary approvals, comparisons, rule-review drafts, an English searchable PDF layer, retention reminders, offline app shell and six new workspace pages. Account/team/private-storage integration and server-enforced organization schema are included; the approved LabelProof cloud project is active in Mumbai, with private images, password login for confirmed accounts, team roles and version-checked workspace sync. Public signup/recovery delivery and redirects await email-provider setup and a Supabase dashboard session. Legal validation, registry integration and a remote OCR worker remain unimplemented. This release is not certified production-ready.
+Added persistent capture drafts, resumable browser batches, barcode reading, quality hints, reviewer assignments/comments/preliminary approvals, comparisons, rule-review drafts, an English searchable PDF layer, opt-in local retention, offline app shell and six new workspace pages. Account/team/private-storage integration and server-enforced organization schema are included; the approved LabelProof cloud project is active in Mumbai, with private images, password login for confirmed accounts, team roles and version-checked workspace sync. Public signup/recovery delivery and redirects await email-provider setup and a Supabase dashboard session. This historical v3.0 summary predates the v3.4 cloud worker and restore implementation. Legal validation and registry integration remain pending. This release is not certified production-ready.
 
 ## Interaction fixes in v2.1
 
@@ -73,7 +78,7 @@ The original single-screen prototype has become a separate dashboard with nine w
 
 OCR detects declaration text. It does not automatically validate every clause, category exception, effective date, physical font size, nutrition value or licence authenticity. Source references are official entry points, not a published legal rule pack. Applicability starts as unknown; reviewers can record their assessment with a rationale.
 
-The deployment supports local IndexedDB plus an active Supabase PostgreSQL database, confirmed-account authentication, private evidence storage and server-enforced organization roles. Cloud upload/download are explicit actions on Team & cloud. Public account email delivery and recovery redirects still need configuration. Government registry verification, validated legal rules, remote OCR workers, automatic backup restoration, account deletion and external incident alerts remain release gates. See [cloud activation and verification](docs/CLOUD_ACTIVATION.md).
+The deployment supports local IndexedDB plus an active Supabase PostgreSQL database, confirmed-account authentication, private evidence storage and server-enforced organization roles. Cloud upload/download are explicit actions on Team & cloud. Public account email delivery and recovery redirects still need configuration. Government registry verification, validated legal rules, public email activation, cloud account/data deletion, independent disaster recovery and external incident alerts remain release gates. See [cloud activation and verification](docs/CLOUD_ACTIVATION.md).
 
 ## Features and routes
 
@@ -91,12 +96,11 @@ The deployment supports local IndexedDB plus an active Supabase PostgreSQL datab
 | Rule library | `/dashboard/rules` | Official references, detector inventory and persistent draft review notes |
 | Activity timeline | `/dashboard/activity` | Scans, corrections, exports, imports, preferences and draft changes |
 | Account | `/dashboard/account` | Confirmed-account login/logout, password update, signup/recovery controls with email-setup status |
-| Team & cloud | `/dashboard/team` | Organization creation/selection, server-enforced roles, private image upload and version-checked snapshot sync |
-| Processing | `/dashboard/processing` | Persistent browser batches, retry and interruption recovery |
-| Review workflow | `/dashboard/approvals` | Local preliminary decisions and server role-checked team review records bound to a snapshot and assessment hash |
+| Team & cloud | `/dashboard/team` | Organization creation/selection, server roles, private images, strict snapshot validation, restore previews and server audit |
+| Processing | `/dashboard/processing` | Durable server OCR with scheduler recovery, original private images, plus local browser batches |
+| Review workflow | `/dashboard/approvals` | Local decisions; cloud role/version checks, valid team assignments and hash-bound review records |
 | Comparison | `/dashboard/compare` | Side-by-side assessment findings |
 | Readiness | `/dashboard/operations` | Health checks, review drafts and evaluation exports |
-| Project documents | `/dashboard/documents` | Five PDF/Markdown specifications, master/MVP prompt, verification and complete ZIP |
 | Settings | `/dashboard/settings` | Workspace/reviewer names, OCR language, uncertainty threshold, backup/import and deletion |
 
 All pages are usable on desktop and mobile. The mobile navigation opens from the menu button. File-backup imports get new identifiers. Cloud downloads retain a per-account, per-organization ID mapping, so repeated downloads update matching cloud records without duplicates. Unrelated local records remain available; export unsynced work before downloading.
@@ -243,8 +247,8 @@ flowchart LR
 | Build | Vite 6.4.3 with a lockfile; OCR is loaded on demand |
 | OCR | Tesseract.js 6.0.1, English or English + Hindi |
 | Observation engine | Deterministic declaration detectors, uncertainty states and cross-image conflict retention |
-| Database | IndexedDB object stores; original images remain binary blobs |
-| Backend | Vercel metadata functions plus Supabase Auth, private Storage and authorization-enforcing PostgreSQL RPCs |
+| Database | Account-scoped IndexedDB plus Supabase PostgreSQL jobs, snapshots, history, team roles and audit |
+| Backend | Vercel server OCR/dispatch and metadata functions; Supabase Auth, private Storage, worker gateway and protected RPCs |
 | Reports | Versioned assessment snapshots, JSON, CSV, downloadable PDF |
 | Hosting | Vercel production deployment with dashboard-route rewrites |
 
@@ -271,8 +275,10 @@ A proposed production PostgreSQL schema is included at [database/production-sche
 | GET | `/api/sources` | Official source manifest and detector metadata; legal validation marked pending |
 | GET | `/api/config` | Public Supabase URL/publishable key and connection status |
 | POST | `/api/telemetry` | Validated diagnostic codes only; no external alert delivery |
+| POST | `/api/jobs` | Verified user/team dispatch of saved OCR jobs |
+| POST | `/api/worker` | Machine-only scheduled OCR processing; rejects public callers |
 
-These endpoints do not accept or store packaging images. Details are in [docs/API.md](docs/API.md).
+Images are uploaded to private Supabase Storage. The worker reads only authenticated job evidence and publishes an atomic report bundle. Details are in [docs/API.md](docs/API.md).
 
 ## File structure
 

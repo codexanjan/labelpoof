@@ -1,3 +1,7 @@
+# v3.4 update
+
+Cloud OCR, scheduled worker recovery, account-separated caches, strict snapshot validation, reviewer version checks and cloud restore points are now implemented. The remaining release gates are listed in [the current implementation report](V3_4_IMPLEMENTATION.md). The text below is the historical v3.0 activation record.
+
 # LabelProof cloud activation — 3.1.0
 
 Approved 5 October 2026. Dedicated project: `labelproof`, region `ap-south-1` (Mumbai), in codexanjan's Org. Quoted base project cost: 0/month. Existing unrelated cloud projects were not changed.

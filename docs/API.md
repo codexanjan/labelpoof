@@ -1,3 +1,7 @@
+# Current v3.4 APIs
+
+Cloud jobs use `lp_enqueue_job`, `POST /api/jobs` (verified user and team membership), and a machine-only `POST /api/worker`. `lp_review_checked` replaces the old review mutation and requires `expected_version`; assignment uses `assigned_to`. `lp_restore_snapshot` requires an admin and current version. Job/history reads are protected by organization RLS. See [v3.4 implementation](V3_4_IMPLEMENTATION.md) for limits, migrations and recovery.
+
 # API contracts
 
 ## Implemented Vercel endpoints

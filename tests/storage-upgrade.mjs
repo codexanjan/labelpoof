@@ -1,6 +1,6 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
-const origin = process.env.TEST_URL || "http://localhost:4173";
+const origin = process.env.TEST_URL || "http://localhost:5173";
 const browser = await chromium.launch({ channel: "chrome" });
 try {
   const ctx = await browser.newContext();

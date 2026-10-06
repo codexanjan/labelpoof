@@ -1,5 +1,7 @@
 # Product and system design
 
+Historical v2 design. The current [UI and UX specification](specifications/04-UI-UX.md) covers the extended dashboard, demo, team, document and recovery flows.
+
 ## Information architecture
 
 `/` is the public project page. `/dashboard` is the dedicated workspace. The persistent navigation exposes Overview, My scans, Review queue, Evidence library, Reports, Analytics, Rule library, Activity log and Settings. Guided capture and evidence reports have distinct URLs.

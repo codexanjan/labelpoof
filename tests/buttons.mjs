@@ -1,6 +1,7 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, mkdir } from "node:fs/promises";
+await mkdir("work", { recursive: true });
 const origin = process.env.TEST_URL || "http://localhost:5173";
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const page = await browser.newPage({ acceptDownloads: true });
@@ -23,7 +24,7 @@ await page.locator('[data-finding-filter="all"]').click();
 const download = page.waitForEvent("download");
 await page.locator('[data-action="print"]').click();
 const pdf = await download;
-await pdf.saveAs("docs/sample-report.pdf");
+await pdf.saveAs("work/button-report.pdf");
 const bytes = await readFile(await pdf.path());
 assert.equal(bytes.subarray(0, 5).toString(), "%PDF-");
 assert.ok(bytes.length > 100000);
@@ -129,7 +130,7 @@ await page.waitForFunction(
 );
 assert.equal(await page.locator(".upload-card").count(), 0);
 await page.locator("#product-name").fill("Cancellation test");
-await page.locator("#file").setInputFiles("../../work/ocr-180.png");
+await page.locator("#file").setInputFiles("tests/fixtures/label-180.png");
 await page.locator(".upload-card").waitFor();
 await page.locator("[data-image-surface]").selectOption("Back");
 await page.locator("[data-image-quality]").selectOption("Unreadable");

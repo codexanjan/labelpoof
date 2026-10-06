@@ -1,5 +1,7 @@
 # Technical requirements and implementation
 
+Historical v2 document. Use the current [development architecture](specifications/03-Development-Architecture.md) and [SRS](specifications/02-SRS.md) for active cloud services, database models, current interfaces and production targets.
+
 ## Current architecture
 
 Vite builds a browser application from JavaScript ES modules. Routing uses the History API, backed by Vercel rewrites for `/dashboard/*`. Page templates are split into landing, workspace, capture and report modules. Selected Lucide icons and lazy OCR reduce the main bundle compared with the original prototype.

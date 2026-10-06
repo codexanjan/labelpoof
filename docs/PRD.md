@@ -1,5 +1,7 @@
 # Product requirements — LabelProof v2
 
+Historical v2 document. The current [complete PRD](specifications/01-PRD.md) supersedes this baseline. Private cloud accounts and sync are now active; public email and production rule validation remain pending.
+
 ## Problem
 
 OCR checklists often confuse “not read” with “not present”. A packaging photograph may be blurry, incomplete, curved or obstructed. A useful review must make that uncertainty visible and connect observations to evidence.

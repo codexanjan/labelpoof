@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { DEMO_ACCESS } from "../src/demo-access.js";
-const origin = process.env.TEST_URL || "http://localhost:5173";
+const origin = process.env.TEST_URL || "https://labelproof-prototype.vercel.app";
 const config = origin.startsWith("http://localhost")
   ? {
       url: process.env.SUPABASE_URL,

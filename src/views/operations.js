@@ -1,8 +1,13 @@
 import { esc, heading, date } from "../ui.js";
 import { cloudStatus } from "../cloud.js";
 import { DEMO_ACCESS, isDemoUser } from "../demo-access.js";
-const button = (key, label) =>
-  `<button class="secondary" data-extra="${key}" ${isDemoUser(cloudStatus.user) && ["create-org", "add-member", "sync-cloud"].includes(key) ? 'disabled title="Shared demo cloud workspace is read-only"' : ""}>${label}</button>`;
+const button = (key, label) => {
+  const cloudActions = ["login", "signup", "recovery", "password", "logout", "demo", "create-org", "list-orgs", "add-member", "list-members", "sync-cloud", "pull-cloud"];
+  const waiting = !cloudStatus.configured && cloudActions.includes(key);
+  const readOnly = isDemoUser(cloudStatus.user) && ["create-org", "add-member", "sync-cloud"].includes(key);
+  const restriction = waiting ? "Cloud connection is not available yet" : "Shared demo cloud workspace is read-only";
+  return `<button class="secondary" data-extra="${key}" ${waiting || readOnly ? `disabled title="${restriction}"` : ""}>${label}</button>`;
+};
 export function operationsView(view, data) {
   const rows = data.operations || [];
   const demo = isDemoUser(cloudStatus.user);

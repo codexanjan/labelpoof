@@ -1,12 +1,27 @@
 # LabelProof — Evidence, not assumptions
 
-**SIH26034 concept · Packaged-food label review workspace · Version 3.2**
+**SIH26034 concept · Packaged-food label review workspace · Version 3.3**
 
 Scan a packaged product, follow its image evidence, and understand what was observed, what is unreadable, and what still needs a photograph. LabelProof turns label review into a transparent, traceable workflow.
 
 **[Open dashboard](https://labelproof-prototype.vercel.app/dashboard)** · **[Public landing page](https://labelproof-prototype.vercel.app/)** · **[Sample report](https://labelproof-prototype.vercel.app/dashboard/scans/demo-oats)** · **[Implementation report](docs/IMPLEMENTATION_REPORT.md)**
 
 ![LabelProof dashboard with product images, observation counts, review queue and activity](docs/images/dashboard.png)
+
+## Complete project documents and master prompt
+
+[Open Project documents](https://labelproof-prototype.vercel.app/dashboard/documents) to download five complete specifications as PDFs and editable Markdown, the full master and MVP prompt, a verification report and the all-documents ZIP.
+
+- [PRD](docs/specifications/01-PRD.md): scope, users, journeys, priorities and release acceptance.
+- [SRS](docs/specifications/02-SRS.md): 29 functional requirements, data invariants, interfaces and nonfunctional targets.
+- [Development architecture](docs/specifications/03-Development-Architecture.md): current frontend/backend/cloud model, target models, APIs, jobs, deployment and migration sequence.
+- [UI and UX](docs/specifications/04-UI-UX.md): screen behavior, uncertainty, responsive flows and accessibility.
+- [Testing](docs/specifications/05-Testing.md): executable suites, requirement traceability, 12 scenario groups and production gates.
+- [Full master and MVP prompt](docs/specifications/MASTER-PROMPT.md) and [release verification](docs/specifications/VERIFICATION.md).
+
+Version 3.3 adds the documentation page, a reproducible full-test runner and faster workspace startup that renders local evidence independently of cloud setup. Button/batch fixtures now live in the repository; scratch downloads stay in ignored `work/`. Run `npm run test:full` after `npm ci`; it starts and stops its own isolated Vite server. Chrome and first-use OCR network access are required. Use `npm run test:deployment` for live API/routes. Set `TEST_URL` to `https://labelproof-prototype.vercel.app` and run `npm run test:demo` for the real read-only cloud demo.
+
+These specifications supersede the historical v2 PRD, PSD, TRD and original proposed database documentation. Implemented features and target production features are explicitly distinguished. Public email, reviewed legal packs, remote OCR, enforced retention/deletion, account-isolated local caches, backup restoration drills and external alerts remain release gates.
 
 ## Demo login
 
@@ -81,6 +96,7 @@ The deployment supports local IndexedDB plus an active Supabase PostgreSQL datab
 | Review workflow | `/dashboard/approvals` | Local preliminary decisions and server role-checked team review records bound to a snapshot and assessment hash |
 | Comparison | `/dashboard/compare` | Side-by-side assessment findings |
 | Readiness | `/dashboard/operations` | Health checks, review drafts and evaluation exports |
+| Project documents | `/dashboard/documents` | Five PDF/Markdown specifications, master/MVP prompt, verification and complete ZIP |
 | Settings | `/dashboard/settings` | Workspace/reviewer names, OCR language, uncertainty threshold, backup/import and deletion |
 
 All pages are usable on desktop and mobile. The mobile navigation opens from the menu button. File-backup imports get new identifiers. Cloud downloads retain a per-account, per-organization ID mapping, so repeated downloads update matching cloud records without duplicates. Unrelated local records remain available; export unsynced work before downloading.
@@ -228,7 +244,7 @@ flowchart LR
 | OCR | Tesseract.js 6.0.1, English or English + Hindi |
 | Observation engine | Deterministic declaration detectors, uncertainty states and cross-image conflict retention |
 | Database | IndexedDB object stores; original images remain binary blobs |
-| Backend | Vercel serverless health and source-manifest endpoints |
+| Backend | Vercel metadata functions plus Supabase Auth, private Storage and authorization-enforcing PostgreSQL RPCs |
 | Reports | Versioned assessment snapshots, JSON, CSV, downloadable PDF |
 | Hosting | Vercel production deployment with dashboard-route rewrites |
 
@@ -253,6 +269,8 @@ A proposed production PostgreSQL schema is included at [database/production-sche
 | --- | --- | --- |
 | GET | `/api/health` | Application version, browser-storage/OCR status, explicit legal/registry integration state |
 | GET | `/api/sources` | Official source manifest and detector metadata; legal validation marked pending |
+| GET | `/api/config` | Public Supabase URL/publishable key and connection status |
+| POST | `/api/telemetry` | Validated diagnostic codes only; no external alert delivery |
 
 These endpoints do not accept or store packaging images. Details are in [docs/API.md](docs/API.md).
 

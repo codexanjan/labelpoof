@@ -33,6 +33,7 @@ import {
 import { captureView } from "./views/capture.js";
 import { reportView } from "./views/report.js";
 import { operationsView } from "./views/operations.js";
+import { documentationView } from "./views/documentation.js";
 import { initCloud, cloudStatus, cloudClient, authAction } from "./cloud.js";
 import { qualityHints } from "./quality.js";
 import { validateDeclarations } from "./validation.js";
@@ -69,6 +70,7 @@ const nav = [
   ["approvals", "Review workflow", "check", "/approvals"],
   ["compare", "Compare reports", "files", "/compare"],
   ["operations", "Release readiness", "activity", "/operations"],
+  ["documents", "Project documents", "book-open", "/documents"],
 ];
 const id = () => crypto.randomUUID();
 const imageUrl = (image) => {
@@ -162,6 +164,7 @@ function render() {
   bindForms();
 }
 function content(r) {
+  if (r.view === "documents") return documentationView();
   if (
     [
       "account",
@@ -1412,7 +1415,6 @@ async function boot() {
       await storage.put("settings", { ...settings, initialized: true });
     }
     await refresh();
-    await initCloud();
     const capture = await storage.get("captureDrafts", "active");
     if (capture?.draft) state.draft = capture.draft;
     const heldLocks = navigator.locks
@@ -1426,6 +1428,15 @@ async function boot() {
     await refresh();
     await migrateOldSummaries();
     render();
+    // Open local evidence independently of cloud configuration or recovery.
+    void initCloud().then(() => {
+      if (
+        data &&
+        ["account", "team", "operations", "approvals"].includes(route().view) &&
+        !document.activeElement?.matches("input, textarea, select") &&
+        !$("dialog[open]")
+      ) render();
+    });
   } catch (error) {
     $("#app").innerHTML =
       `<div class="boot-screen"><h1>Browser storage is unavailable.</h1><p>${esc(error.message)}</p><p>Enable site storage or open LabelProof in a regular browser window.</p><button data-storage-action="reload" class="primary">Retry</button></div>`;
@@ -1455,7 +1466,7 @@ window.addEventListener("error", (e) =>
     .catch(() => {}),
 );
 window.addEventListener("labelproof-auth", () => {
-  if (["account", "team", "operations"].includes(route().view)) render();
+  if (data && ["account", "team", "operations"].includes(route().view)) render();
 });
 let batchStop = false,
   batchRunning = false;

@@ -38,7 +38,7 @@ assert.ok(
 );
 await p.goto(origin + "/dashboard/new");
 await p.locator("#product-name").fill("Saved capture draft");
-await p.locator("#file").setInputFiles("../../work/ocr-180.png");
+await p.locator("#file").setInputFiles("tests/fixtures/label-180.png");
 await p.locator(".upload-card").waitFor();
 await p.reload();
 await p.locator("#product-name").waitFor();
@@ -49,7 +49,7 @@ assert.equal(
 assert.equal(await p.locator(".upload-card").count(), 1);
 await p.locator('[data-action="cancel-capture"]').click();
 await p.goto(origin + "/dashboard/processing");
-await p.locator("#batch-files").setInputFiles("../../work/ocr-180.png");
+await p.locator("#batch-files").setInputFiles("tests/fixtures/label-180.png");
 await p.waitForFunction(() =>
   document.querySelector("main").textContent.includes("queued"),
 );
@@ -66,7 +66,7 @@ await p.locator('a[href^="/dashboard/scans/"]').last().click();
 await p.locator(".finding-list").waitFor();
 assert.ok((await p.locator(".finding-icon.observed").count()) >= 9);
 await p.goto(origin + "/dashboard/processing");
-await p.locator("#batch-files").setInputFiles("../../work/ocr-180.png");
+await p.locator("#batch-files").setInputFiles("tests/fixtures/label-180.png");
 await p.waitForFunction(() =>
   document.querySelector("main").textContent.includes("queued"),
 );

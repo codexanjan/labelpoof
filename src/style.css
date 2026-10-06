@@ -3976,3 +3976,7 @@ td {
   overflow-wrap: anywhere;
   margin-top: 20px;
 }
+/* Project documentation uses the existing panel and action styles. */
+.documentation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 24px 0; }
+.documentation-grid .capture-actions { flex-wrap: wrap; }
+@media (max-width: 760px) { .documentation-grid { grid-template-columns: 1fr; } }

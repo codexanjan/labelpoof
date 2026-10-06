@@ -11,7 +11,7 @@ const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (error) => errors.push(error.message));
 await mkdir("docs/images", { recursive: true });
-await mkdir("../../work", { recursive: true });
+await mkdir("work", { recursive: true });
 const shot = async (name) => {
   await page.screenshot({ path: `docs/images/${name}.png`, fullPage: true });
 };
@@ -130,10 +130,10 @@ await page
   .getByRole("button", { name: "Export full backup with images" })
   .click();
 const backup = await backupDownload;
-await backup.saveAs("../../work/workspace-backup.json");
+await backup.saveAs("work/workspace-backup.json");
 await page
   .locator("#backup-file")
-  .setInputFiles("../../work/workspace-backup.json");
+  .setInputFiles("work/workspace-backup.json");
 await page.getByRole("heading", { name: "Every scan has a story." }).waitFor();
 assert.equal(await page.locator(".scan-results tbody tr").count(), 6);
 await page.locator("#scan-search").fill("mountain");

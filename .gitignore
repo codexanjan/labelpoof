@@ -6,3 +6,4 @@ dist
 .env*
 
 supabase/.temp/
+work/

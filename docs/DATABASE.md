@@ -1,5 +1,7 @@
 # Database models
 
+Historical model notes. Use the current [architecture](specifications/03-Development-Architecture.md) for IndexedDB schema version 2 and the deployed Supabase tables. The older proposed production model below is not the deployed cloud schema.
+
 ## Deployed prototype: IndexedDB
 
 Database name: `labelproof-workspace-v2`, schema version 1. Object stores use `id` as key. `scans`, `images`, `assessments` and `events` are committed together during assessment creation. `settings` holds preferences; `drafts` holds non-executable review notes.

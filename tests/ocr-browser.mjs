@@ -1,7 +1,7 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
-await mkdir("../../work", { recursive: true });
+await mkdir("work", { recursive: true });
 const origin = process.env.TEST_URL || "http://localhost:5173";
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1080 } });
@@ -11,12 +11,12 @@ const fixture = async (price, path) => {
   );
   await page.locator("div").screenshot({ path });
 };
-await fixture(180, "../../work/ocr-180.png");
-await fixture(200, "../../work/ocr-200.png");
+await fixture(180, "work/ocr-180.png");
+await fixture(200, "work/ocr-200.png");
 await page.goto(origin + "/dashboard/new");
 await page.locator("#product-name").fill("Real OCR workflow test");
 await page.locator("#surface").selectOption("Back");
-await page.locator("#file").setInputFiles("../../work/ocr-180.png");
+await page.locator("#file").setInputFiles("work/ocr-180.png");
 await page.getByRole("button", { name: "Review label", exact: true }).click();
 await page
   .getByRole("heading", { name: "Real OCR workflow test", exact: true })
@@ -39,7 +39,7 @@ assert.ok(
 );
 await page.locator("[data-rescan]").click();
 await page.locator("#surface").selectOption("Back");
-await page.locator("#file").setInputFiles("../../work/ocr-200.png");
+await page.locator("#file").setInputFiles("work/ocr-200.png");
 await page.getByRole("button", { name: "Reassess label", exact: true }).click();
 await page
   .getByRole("heading", { name: "Real OCR workflow test", exact: true })
@@ -66,10 +66,10 @@ const downloaded = page.waitForEvent("download");
 await page
   .getByRole("button", { name: "Export full backup with images" })
   .click();
-await (await downloaded).saveAs("../../work/ocr-workspace.json");
+await (await downloaded).saveAs("work/ocr-workspace.json");
 await page
   .locator("#backup-file")
-  .setInputFiles("../../work/ocr-workspace.json");
+  .setInputFiles("work/ocr-workspace.json");
 await page.getByRole("heading", { name: "Every scan has a story." }).waitFor();
 await page.locator("#scan-search").fill("Real OCR workflow test");
 assert.equal(await page.locator(".scan-results tbody tr").count(), 2);

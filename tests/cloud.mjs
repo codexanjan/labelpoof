@@ -387,9 +387,9 @@ try {
   await browser.close();
   await Promise.all(clients.map((c) => c.auth.signOut()));
 }
-mkdirSync("../../work", { recursive: true });
+mkdirSync("work", { recursive: true });
 writeFileSync(
-  "../../work/cloud-verification.json",
+  "work/cloud-verification.json",
   JSON.stringify({ at: new Date().toISOString(), checks }, null, 2),
 );
 console.log(

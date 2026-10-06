@@ -1,5 +1,7 @@
 # Build and expansion prompts
 
+The current [complete master and MVP prompt](specifications/MASTER-PROMPT.md) supersedes these historical v2 prompts and covers the active cloud model, five specifications, tests and production gates.
+
 ## Prototype maintenance prompt
 
 You are maintaining LabelProof v2. Inspect README, PRD, PSD and TRD before changes. Keep the separate landing/dashboard routes, original image persistence, versioned assessments and explicit evidence states. Never convert OCR non-detection into automatic absence. Missing-declaration review requires confirmed applicability, readable-coverage attestation, available images and rationale. Preserve original text and image provenance. Run the unit/API suite, relevant browser checks and production build. Keep synthetic assets labelled and update screenshots/docs for material interface changes. Never commit environment files, credentials or private user images.

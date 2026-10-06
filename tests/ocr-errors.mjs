@@ -4,7 +4,7 @@ const browser = await chromium.launch({ channel: "chrome", headless: true });
 const page = await browser.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
-await page.goto("http://localhost:5173/dashboard");
+await page.goto((process.env.TEST_URL || "http://localhost:5173") + "/dashboard");
 await page.locator("main h1").waitFor();
 const result = await page.evaluate(async () => {
   const { readImages } = await import("/src/ocr.js");
